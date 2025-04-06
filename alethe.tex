@@ -1,0 +1,131 @@
+\section{Alethe proof}
+\label{sect:alethe}
+
+The Alethe proof trace format \cite{alethespec} for SMT solvers comprises two parts: the trace language based on SMT-LIB and a collection of proof rules. Traces witness proofs of unsatisfiability of a set of constraints.
+They are sequences $a_1 \dots a_m~t_1 \dots t_n$ where
+the $a_i$ corresponds to the constraints of the original SMT problem being refuted, each $t_i$ is a clause inferred from previous elements of the sequence, and $t_n$ is $\bot$ (the empty clause).
+In the following, we designate the SMT-LIB problem as the \emph{input problem}.
+
+\begin{lstlisting}[language=SMT,label={lst:smtexampleinput}]
+(set-logic QF_LIA)
+(declare-const x Int)
+(declare-const y Int)
+(assert (= 0 y))
+(assert (= x 2))
+(assert (or (< (+ x y) 1) (< 3 x)))
+(check-sat)
+(get-proof)
+\end{lstlisting}
+
+\begin{center}
+\lightning
+\end{center}
+
+\begin{lstlisting}[language=SMT,caption={The following example is the proof for the unsatisfiability of $(x+y < 1) \lor (3<x), x = 2$ and $0 = y$.},label={lst:smtexampleproof}]
+(assume a0 (or (< (+ x y) 1) (< 3 x)))
+(assume a1 (= x 2))
+(assume a2 (= 0 y))
+(step t1 (cl (< (+ x y) 1) (< 3 x)) :rule or :premises (a0))
+(step t2 (cl (not (< 3 x)) (not (= x 2))) :rule la_generic :args (1/1 1/1))
+(step t3 (cl (not (< 3 x))) :rule resolution :premises (a1 t2))
+(step t4 (cl (< (+ x y) 1)) :rule resolution :premises (t1 t3))
+(step t5 (cl (not (< (+ x y) 1)) (not (= x 2)) (not (= 0 y))) :rule la_generic :args (1/1 -1/1 1/1))
+(step t6 (cl) :rule resolution :premises (t5 t4 a1 a2))
+\end{lstlisting}
+
+We will use the input problem shown in the top part of \cref{lst:smtexampleinput} with its Alethe proof (found by cvc5) in the bottom part as a running example to provide an overview of Alethe concepts and to illustrate our reconstruction of linear arithmetic step in Lambdapi.
+
+An Alethe proof trace inherits the declarations of its input problem. All symbols (sorts, functions, assertions, etc.) declared or defined in the input problem remain declared or defined, respectively. Furthermore, the syntax for terms, sorts, and annotations uses the syntactic rules defined in SMT-LIB \cite[\S 3]{smtlib} and the SMT signature context defined in \cite[\S 5.1 and \S 5.2]{smtlib}.
+In the following we will represent an Alethe step as
+
+\smallskip
+
+\renewcommand{\eqnhighlightshade}{35}
+
+\begin{equation}
+\label{eq:step}
+\tag{\textcolor{purple}{1}}
+\eqnmarkbox[indexClr]{node2}{i}. \quad \eqnmarkbox[blue]{node1}{\Gamma} ~\triangleright~ \eqnmarkbox[green]{node3}{l_1 \dots l_n} \quad (\eqnmarkbox[purple]{node4}{\mathcal{R}}~\eqnmarkbox[red]{node5}{p_1 \dots p_m})~\eqnmarkbox[orange]{node6}{[a_1 \dots a_r]}
+\end{equation}
+
+\vspace{0.3em}
+\annotate[yshift=-0.5em]{below, left}{node2}{index}
+\annotate[yshift=-0.5em]{below, right}{node1}{context}
+\annotate[yshift=0.5em]{above, left}{node3}{clause}
+\annotate[yshift=-0.5em]{below, right}{node4}{rule}
+\annotate[yshift=-0.5em]{below, right}{node5}{premises}
+\annotate[yshift=-0.5em]{below, right}{node6}{arguments}
+
+\vspace{0.3em}
+
+\medskip
+
+A step %\cref{eq:step} 
+consists of an index \colorbox{indexClr!30}{$i$} $\in \mathbb{I}$ where $\mathbb{I}$ is a countable infinite set of indices (e.g. \kw{a0}, \kw{t1}), and a clause of formulae \colorbox{green!30}{$l_1, \dots, l_n$} representing an $n$-ary disjunction. Steps that are not assumptions are justified by a proof rule \colorbox{purple!30}{$\mathcal{R}$} that depends on a possibly empty set of premises $\{\colorbox{red!30}{$p_1 \dots  p_m$}\} \subseteq \mathbb{I}$ that only references earlier steps such that the proof forms
+a directed acyclic graph. A rule might also depend on a list of arguments \colorbox{orange!30}{$[a_1 \dots a_r]$} where each argument $a_i$ is either a term or a pair $(x_i, t_i)$ where $x_i$ is a variable and $t_i$ is a term. The interpretation of the arguments is rule specific. The context \colorbox{blue!30}{$\Gamma$} of a step is a list $c_1 \dots c_l $ where each element $c_j$ is either a variable or a variable-term tuple denoted $x_j \mapsto t_j$. Therefore, steps with a non-empty context contain variables $x_j$ that appear in \colorbox{green!30}{$l_i$} and will be substituted by $t_j$. Proof rules \colorbox{purple!30}{$\mathcal{R}$} include theory lemmas and \texttt{resolution}, which corresponds to hyper-resolution on ground first-order clauses. 
+
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{ll}
+    Rule & Description \\ \hline
+    la\_generic & Tautologous disjunction of linear inequalities. \\
+    lia\_generic & Tautologous disjunction of linear integer inequalities. \\
+    la\_disequality & $t_1 \approx t_2 \lor \neg (t_1 \geq t_2) \lor \neg (t_2 \geq t_1)$ \\
+    la\_totality & $t_1 \geq t_2 \lor t_2 \geq t_1$ \\
+    la\_tautology & A trivial linear tautology \\
+    la\_rw\_eq & $(t \approx u) \approx (t \geq u \land u \geq t)$ \\
+    div\_simplify & Simplification of division. \\
+    prod\_simplify & Simplification of products. \\
+    unary\_minus\_simplify & Simplification of the unuary minus. \\
+    minus\_simplify & Simplification of the substractions. \\
+    sum\_simplify & Simplification of sums. \\
+    comp\_simplify & Simplification of arithmetic comparisons. \\
+    \end{tabular}
+    \caption{Linear arithmetic rules in Alethe.}
+    \label{table:linear-arith-rules}
+\end{table}
+
+We now have the key components to explain the guiding proof in the bottom part of \cref{lst:smtexampleproof}.
+The proofs starts with \tt{assume} steps \tt{a0}, \tt{a1}, \tt{a2} that restate the assertions from the \textit{input problem} (\cref{lst:smtexampleproof}).
+Step \tt{t1} transforms disjunction into clause by using the Alethe rule \tt{or}.
+Steps \tt{t2} and \tt{t5} are tautologies introduced by the main rule \tt{la\_generic}
+in LA logic and used also in LIA logic, where \colorbox{green!30}{$\neg l_1, \neg l_2,\dots, \neg l_n$} are linear inequalities. Checking the validity of this clause amounts to checking the unsatisfiability of the
+system of linear equations e.g. $x < 3$ and $x = 2$ in \tt{t2}. A coefficient for each inequality are pass as arguments e.g. $(\frac{1}{1},\frac{1}{1})$ in \tt{t2}.
+Steps \tt{t3} (and \tt{t4}) applies the \colorbox{purple!30}{\texttt{resolution}} rule to the premises \tt{a1}, \tt{t2} (respectively \tt{t1} \tt{t3}).
+Finally, the step \texttt{t6} concludes the proof by generating the empty clause $\bot$, concretely denoted as \kw{(cl)} in \cref{lst:smtexampleproof}. %(line 8) 
+Notice that the contexts \colorbox{blue!30}{$\Gamma$} of each step are all empty in this proof.
+
+
+Proofs for linear arithmetic steps use a number of straightforward rules listed in \cref{table:linear-arith-rules}, such as \tt{la\_totality} $(t_1 \leq t_2 \lor t_2 \geq t_1)$
+and the main rules \tt{la\_generic} and \tt{lia\_generic}. The \tt{lia\_generic} rule takes the same form as
+\tt{la\_generic}, without the additional coefficients. Since this rule can introduce a disjunction of arbitrary linear integer inequalities without any additional hints, proof checking can be NP-hard.
+Although the \tt{la\_generic} rule seems primarily designed for LA logic, it is also employed in LIA proofs when all variables in the (in)equalities are integer-sorted.
+While it can produce rational coefficients, it is rarely used in practice with CVC5 proofs.
+
+\section{Lia elaboration}
+
+Carcara considers $\tt{lia\_generic}$ steps as holes in the proof, as verifying them is as difficult.
+Currently, Carcara relies on an external tool that generates Alethe proofs to formulate the steps by solving corresponding problems in a proof-producing manner.
+The proof is then imported, verified, and validated before replacing the original step.
+However, at present, Carcara only use cvc5 for performing this task.
+It is important to note that cvc5 has a limitation: its Alethe proofs may contain rewrite steps that are not yet modeled in the Alethe simplification rules, and as such, these steps are not supported by Carcara.
+While these steps are considered holes, they typically involve simple simplification rules and, therefore, have much less impact than the more complex $\tt{lia\_generic}$ ones.
+
+In detail, the elaboration method, when encountering a $\tt{lia\_generic}$ step S concluding the negated inequalities $ \neg l_1 \lor \dots \neg l_n$ , generates an SMT-LIB problem asserting $l_1 \land \dots \land l_n$ and invokes \emph{cvc5} on it, expecting an Alethe proof $\pi : (l_1 \land \dots \land l_n) \ra \bot$.
+Carcara will check each step in $\pi$ and, if they are not invalid, will replace step $S$ in the original proof by a proof of the form:
+\begin{lstlisting}[language=SMT,caption={Elaboration of $\tt{lia\_generic}$},label={lst:smtexampleinput}]
+(anchor :step S.t_m+1)
+(assume S.h_1 l1)
+...
+(assume S.h_n ln)
+...
+(step t.t_m (cl false) :rule ...)
+(step t.t_m+1 (cl (not l1) ... (not ln) false) :rule subproof)
+(step t.t_m+2 (cl (not false)) :rule false)
+(step S (cl (not l1) ... (not ln)) :rule resolution :premises (S.t_m+1 S.t_m+2))
+\end{lstlisting}
+
+We decided to leverage the elaboration process of $\tt{lia\_generic}$ performed by Carcara,
+as doing otherwise would require implementing Fourier-Motzkin elimination for integers, as demonstrated in \cite{omegatest,micromega} -
+and therefore reimplementing the work done by the solver.

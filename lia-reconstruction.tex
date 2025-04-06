@@ -1,0 +1,93 @@
+\section{Reconstruction of linear integer arithmetic}
+
+
+% https://q.uiver.app/#q=WzAsOCxbMSwyLCJcXG1hdGhiYntafSJdLFsxLDAsIlxcbWF0aGNhbHtSfSJdLFszLDAsIlxcbWF0aGNhbHtSfSJdLFszLDIsIlxcbWF0aGJie1p9Il0sWzAsMiwidF8xID1fXFxtYXRoYmJ7Wn0gdF8yIl0sWzQsMiwiZGVub3RlKHRfMSkgPV9cXG1hdGhiYntafSBkZW5vdGUodF8yKSJdLFswLDAsInJlaWZ5KHRfMSkgPV9cXG1hdGhjYWx7Un0gcmVpZnkodF8yKSJdLFs0LDAsIm5vcm0odF8xKSA9X1xcbWF0aGNhbHtSfSBub3JtKHRfMikiXSxbMCwxLCJyZWlmeSJdLFsxLDIsIlxccmlnaHRhcnJvd197QUN9IiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZG90dGVkIn19fV0sWzIsMywiZGVub3RlIl0sWzAsMywiXFxlcXVpdiIsMSx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6ImRvdHRlZCJ9LCJoZWFkIjp7Im5hbWUiOiJub25lIn19fV1d
+\begin{tikzcd}[ampersand replacement=\&,column sep=small]
+	{reify(t_1) =_\mathcal{R} reify(t_2)} \& {\mathcal{R}} \&\& {\mathcal{R}} \& {{t_1\downarrow_{AC}} =_\mathcal{R} t_2\downarrow_{AC}} \\
+	\\
+	{t_1 =_\mathbb{Z} t_2} \& {\mathbb{Z}} \&\& {\mathbb{Z}} \& {denote({t_1\downarrow_{AC}}) =_\mathbb{Z} denote({t_2\downarrow_{AC}})}
+	\arrow["{\rightarrow_{AC}}", dotted, from=1-2, to=1-4]
+	\arrow["denote", from=1-4, to=3-4]
+	\arrow["reify", from=3-2, to=1-2]
+	\arrow["\iff"{description}, dotted, no head, from=3-2, to=3-4]
+\end{tikzcd}
+
+
+\begin{definition}[$\mathcal{R}$]
+\begin{align*}
+\add{\var{x}{c_1}}{\var{x}{c2}} &\re \kw{var}~x~(c_1 + c_2) \\
+\add{\var{x}{c_1}}{(\add{\var{x}{c_2}}{y})} &\re \add{\var{x}{c_1 + c_2}}{y} \\
+\add{\cst{c_1}}{\cst{c_2}} &\re \cst{c_1 + c_2} \\
+\add{\cst{c_1}}{(\add{\cst{c_2}}{y})} &\re \add{\cst{c_1 + c_2}}{y} \\
+\add{\cst{0}}{x} &\re x \\
+\add{x}{\cst{0}} &\re x \\s
+\opp{\var{x}{c}} &\re \var{x}{(-c)} \\
+\opp{\cst{c}} &\re \cst{(-c)} \\
+\opp{\opp{x}} &\re x \\
+\opp{\add{x}{y}} &\re \add{(\opp{x})}{(\opp{y})} \\
+\mul{k}{\var{x}{c}} &\re \var{x}{(k \times c)} \\
+\mul{k}{\opp{x}} &\re \mul{(-k)}{x} \\
+\mul{k}{(\add{x}{y})} &\re \add{(\mul{k}{x})}{(\mul{k}{y})} \\
+\mul{k}{\cst{c}} &\re \cst{k \times c} \\
+\mul{c_1}{(\mul{c_2}{x})} &\re \mul{(c_1 \times c_2)}{x} \\
+\end{align*}
+\end{definition}
+
+
+\begin{definition}[reify]
+\begin{align*}
+\reify{0} &\re \cst{0} \\
+\reify{(-x)} &\re \opp{\reify{x}} \\
+\reify{(x + y)} &\re \add{\reify{x}}{\reify{y}} \\
+\reify{x} &\re \var{x}{1} \\
+\end{align*}
+\end{definition}
+
+\begin{definition}[denote]
+\begin{align*}
+\den{\var{c}{x}} &\re  c \times x \\
+\den{\cst{c}} &\re c \\
+\den{\opp{x}} &\re  - (\den{x}) \\
+\den{\mul{c}{x}} &\re  c \times \den{x} \\
+\den{\add{x}{y}} &\re \den{x} + \den{y}\\
+\end{align*}
+\end{definition}
+
+
+\begin{definition}
+    Let $\mathit{aliens}_{\sqcup}: \mathcal{C} \rightarrow \mathcal{C}^+$ be the function mapping every term in $\mathcal{C}$ to a non-empty list of terms such that $\mathit{aliens}_{\sqcup}(t) = \mathit{aliens}_{\sqcup}(u) \circ \mathit{aliens}_{\sqcup}(v)$ if $t = u \sqcup v$, and $\mathit{aliens}_{\sqcup}(t) = [t]$ otherwise.
+  
+    Conversely, let $\mathit{comb}_{\sqcup} \colon \mathcal{C}^+ \rightarrow \mathcal{C}$ be the function mapping a non-empty list of $\mathcal{C}$-terms to a term such that  $\mathit{comb}_{\sqcup}[t] = t$ and for all $n \geq 2,  \mathit{comb}_{\sqcup}[t_1, \dots, t_n] = t_1 \sqcup \mathit{comb}_{\sqcup}[t_2,\dots,t_n]$.
+  \end{definition}
+  
+  \smallskip 
+  
+  For example $\mathit{aliens}_{\sqcup}((x \sqcup y) \sqcup z) = [x, y, z]$ and $\mathit{comb}_{\sqcup}[x, y, z] = ((x \sqcup y) \sqcup z)$.
+  
+  \smallskip
+  
+\begin{definition}[AC-canonical form]
+Let $\leq$ be any total order on $\cal{C}$-terms with $\epsilon$ the least element such that for all $x$ and $b$ we have $\epsilon < \var{b}{x}$, and $\var{b}{x} \leq \var{b'}{y}$ iff $x < y$ or else $x = y$ and $b \leq b'$ with the order $\texttt{\false} < \texttt{\true}$.
+The AC-canonization of a term $t$ of $\cal{C}$ is defined as $[t]_{AC} = \mathit{comb}_{\sqcup} [\texttt{sort}(\mathit{aliens}_{\sqcup}(t))]$, where $\texttt{sort(l)}$ is the list of the elements of $l$ in increasing order with respect to $\leq$. The relation associating every term $t$ with its AC-canonization $[t]_{AC}$ is denoted $\RRAC$. Two terms $t$ and $t'$ are AC-equivalent if $[t]_{AC} = [t']_{AC}$.
+The term $t$ is in AC-canonical form if $t = [t]_{AC}$ and if every strict subterm of $t$ is in AC-canonical form. 
+\end{definition}
+
+
+\smallskip
+
+\begin{example}
+Assuming that the terms $x$ and $y$ are ordered $x < y$, the AC-canonical form of $XXX$ is $XXX$.
+\end{example}
+  
+\smallskip
+  
+\begin{definition}[Rewriting modulo AC-canonization]
+Let $\RAC = \RRAC \R$, where $\mathcal{R}$ is defined by the rewrite rules of ??.
+\label{def:RAC}
+\end{definition}
+  
+\smallskip
+  
+An $\RAC$ step is an AC-canonization followed by a standard $\lra_{\mathcal{R}}$ step with syntactic matching.
+  
+  
