@@ -99,3 +99,29 @@
 \newcommand\set{\textcolor{blue}{\texttt{\upshape{Set}}}}
 \newcommand\type{\textcolor{orange}{\texttt{\upshape{TYPE}}}}
 \newcommand\kind{\textcolor{YellowOrange}{\texttt{KIND}}}
+
+%%%%%%%%% veedot symbol for Clause %%%%%%%%%%%%
+
+\makeatletter
+\newcommand{\genericdot@}[2]{% #1=raising factor, #2=symbol
+  \mathbin{\mathpalette\genericdot@@{{#1}{#2}{\cdot}}}%
+}
+\newcommand{\genericdotop@}[2]{% #1=raising factor, #2=symbol
+  \DOTSB\mathop{\mathpalette\genericdot@@{{#1}{#2}{\boldsymbol{\cdot}}}}\slimits@
+}
+\newcommand{\genericdot@@}[2]{\genericdot@@@#1#2}
+\newcommand{\genericdot@@@}[4]{%
+  \vphantom{#3}%
+  \begingroup
+  \sbox\z@{$\m@th#1#3$}%
+  \ooalign{%
+    \usebox{\z@}\cr
+    \hidewidth
+    \raisebox{#2\ht\z@}[\z@][\z@]{$\m@th#1#4$}%
+    \hidewidth\cr
+  }%
+  \endgroup
+}
+\newcommand{\veedot}{\genericdot@{0.3}{\vee}}
+\newcommand{\bigveedot}{\genericdotop@{0.25}{\bigvee}}
+\makeatletter

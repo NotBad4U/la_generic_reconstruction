@@ -49,7 +49,7 @@ The signature $\Sigma$ of our encoding contains the following definitions and re
 &\set: \type & &\prop: \type \\
 &\el: \set \rightarrow \type  & &\prf : \prop \rightarrow \type \\
 &\mathop{\leadsto}: \set \rightarrow \set \rightarrow \set & &o: \set \\
-&\el\,(x \leadsto y) \hookrightarrow \el\,x \rightarrow \el\,y & &\el\,o  \hookrightarrow \prop
+&\el\,(x \leadsto y) \hookrightarrow \el\,x \rightarrow \el\,y & &\el\,o  \hookrightarrow \prop \\
 \end{align*}
 \end{definition}
 
@@ -57,8 +57,22 @@ The signature $\Sigma$ of our encoding contains the following definitions and re
  The type \set{} represents the universe of \textit{small types}, i.e.\ a subclass of types for which we can define equality.
  SMT sorts are represented in $\lpm$ as elements of type \set{}. Since elements of type \set{} are not types themselves, we also introduce a decoding function $\el: \set \rightarrow \type$ that interprets SMT sorts as $\lpm$ types.
  Thus, we represent the terms of sort \texttt{Bool} of SMT by elements of type $\el{}\,o$. The constructor $\leadsto$ is used to encode SMT functions and predicates.
-
 The type \prop{} represents the universe of propositions in $\lpm$. Like \set{}, elements of type \prop{} are not types themselves but are mapped to types by the decoding function $\prf{}: \prop \rightarrow \type$. By analogy with the Curry-de-Brujin-Howard isomorphism, it embeds propositions into types, mapping each proposition $A$ to the type $\prf{}~A$ of its proofs.
+
+\begin{figure}
+\begin{align*}
+&\tt{Clause}: \type & &\cal{F}: \tt{Clause} \ra \prop \\
+&\nil: \tt{Clause} & & \cal{F}~\nil \re \bot \\
+&\veedot: \prop \ra \tt{Clause}  \ra \tt{Clause} & & \cal{F}~x \veedot y \re x \lor^c (\cal{F}~y) \\
+&\pid (c : \tt{Clause}) \coloneqq \pic (\cal{F}~c) & &  \\
+\end{align*}
+\caption{The \tt{Clause} type and operations on clauses.}
+\end{figure}
+
+Alethe distinguishes between clauses that appear in steps, \colorbox{green!30}{(cl\,$l_1 \dots l_n$)} in \cref{eq:step}, and ordinary disjunction \cite[\S 4]{alethespec}.
+The syntax for clauses uses the \textcolor{purple}{\tt{cl}} operator, while disjunction is represented as the standard SMT-LIB \textcolor{purple}{\texttt{or}}.
+We define the type $\kw{Clause}$ that encodes an Alethe clause as a list of propositions. The constructor $\veedot$ prepends an element to a list, and $\nil$ is the empty list.
+Logically, clauses are interpreted as disjunctions via the function $\cal{F}$ defined by rewriting rules. For convenience, we also introduce the predicate $\pid$ asserting that a clause is provable.
 
 \subsection{Classical connectives, quantifiers and facts}
 
@@ -85,7 +99,7 @@ SMT logic enjoys the property of propositional completeness (also referred to as
 
 \subsection{Encoding of Integers in Lambdapi}
 
-The definition of integers in Lambdapi follows a common encoding found in many other theories, such as Coq.
+The definition we use of integers in Lambdapi follows a common encoding found in many other theories, such as Rocq.
 First, the type $\mathbb{P}$  is an inductive type representing strictly positive integers in binary form.
 Starting from 1 (represented by constructor \tt{H}), one can add a new least significant digit via the constructor \tt{O} (digit 0) or constructor \tt{I} (digit 1). 
 The type $\mathbb{Z}$ is an inductive type representing integers in binary form.
@@ -97,25 +111,21 @@ An integer is either zero (with constructor \tt{Z0}) or a strictly positive numb
 &|~\tt{ZPos}: \mathbb{P} \ra \mathbb{Z} & &|~\tt{O}: \mathbb{P} \ra \mathbb{P} \\
 &|~\tt{ZNeg}: \mathbb{P} \ra \mathbb{Z} & &|~\tt{I}: \mathbb{P} \ra \mathbb{P} \\
 &\tt{int}: \set & &\tt{pos}: \set \\
-&\tau~\tt{int} \re \mathbb{Z} & &\tau~\tt{pos} \re \mathbb{P} \\
+&\el~\tt{int} \re \mathbb{Z} & &\el~\tt{pos} \re \mathbb{P} \\
 \end{align*}
-
 
 \subsection{Functions used in the translation}
 
-We now describe how we encode input problems expressed in a given
-SMT-LIB signature \cite[\S 5.2.1]{smtlib}. In order to avoid a notational clash with the Lambdapi signature $\Sigma$, we denote the set of SMT-LIB sorts as $\Theta^\mathcal{S}$, the set of function symbols $\Theta^\cal{F}$, and the set of variables $\Theta^\cal{X}$.
+We now provide an overview of how input problems expressed in a given SMT-LIB signature \cite[\S 5.2.1]{smtlib} are encoded. 
+In order to avoid a notational clash with the Lambdapi signature $\Sigma$, we denote the set of SMT-LIB sorts as $\Theta^\mathcal{S}$, the set of function symbols $\Theta^\cal{F}$, and the set of variables $\Theta^\cal{X}$.
 Alethe does not support the sorts \texttt{Array} and \texttt{String}. Moreover, we do not yet provide support for \texttt{Bitvector} and \texttt{Real}. Our translation is based on the following functions:
+
 \begin{itemize}
 \item $\cal{D}$ translates declarations of sorts and functions in $\Theta^\cal{S}$ and $\Theta^\mathcal{F}$ into constants,
 \item $\cal{S}$ maps sorts to $\Sigma$ types,
 \item $\cal{E}$ translates SMT expression to $\lpm$ terms,
 \item $\cal{C}$ translates a list of commands  $c_1 \dots c_n$ of the form $i.~\Gamma \triangleright~\varphi~(\mathcal{R}~P)[A]$ to typing judgments $\Gamma \vdash_\Sigma i := M: N$.
 \end{itemize}
-
-The remainder of this section introduces functions $\cal{D}$, $\cal{S}$, and $\cal{E}$. The function $\cal{C}$ is the core of the proof reconstruction algorithm and will be introduced in \cref{sect:translate-step}.
-
-\smallskip
 
 \begin{definition}[Function $\mathcal{D}$ translating SMT sort and function symbol declarations]
 For each sort symbol $s$ with arity $n$ in $\Theta^\cal{S}$ we create a constant $s: \set \ra \dots \ra \set$.
