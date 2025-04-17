@@ -124,17 +124,21 @@ Although the sort \lstinline[language=SMT]{Real} is not currently defined in our
 In \tt{LIA}, rational numbers only appear solely as coefficients. Any finite set of such rational coefficients can be transformed into integers by multiplying each by the least common multiple (LCM) of their denominators.
 Thus, defining \lstinline[language=SMT]{Int} suffices to reconstruct proofs from \tt{LIA} input problem.
 
-\section{Lia elaboration}
+\section{The approach to reconstruct lia\_generic step}
 
-Carcara considers $\tt{lia\_generic}$ steps as holes in the proof, as verifying them is as difficult.
-Currently, Carcara relies on an external tool that generates Alethe proofs to formulate the steps by solving corresponding problems in a proof-producing manner.
+The \tt{lia\_generic} still represent a challenge in our reconstruction compared to $\tt{la\_generic}$, because the coefficients are not provided by the solver in the trace i.e. \colorbox{orange!30}{$[a_1 \dots a_r]$} is empty.
+We decided to leverage the elaboration process of $\tt{lia\_generic}$ performed by Carcara, as doing otherwise would require implementing Fourier-Motzkin elimination for integers, as demonstrated in \cite{omegatest,micromega} -
+and therefore reimplementing the work done by the solver.
+
+Carcara considers $\tt{lia\_generic}$ steps as holes in the proof,  as their checking is as hard as solving \cite[\S 3.2]{carcara}.
+However, Carcara relies on an external tool that generates Alethe proofs to formulate the steps by solving corresponding problems in a proof-producing manner.
 The proof is then imported, verified, and validated before replacing the original step.
 However, at present, Carcara only use cvc5 for performing this task.
 It is important to note that cvc5 has a limitation: its Alethe proofs may contain rewrite steps that are not yet modeled in the Alethe simplification rules, and as such, these steps are not supported by Carcara.
 While these steps are considered holes, they typically involve simple simplification rules and, therefore, have much less impact than the more complex $\tt{lia\_generic}$ ones.
 
 In detail, the elaboration method, when encountering a $\tt{lia\_generic}$ step S concluding the negated inequalities $ \neg l_1 \lor \dots \neg l_n$ , generates an SMT-LIB problem asserting $l_1 \land \dots \land l_n$ and invokes \emph{cvc5} on it, expecting an Alethe proof $\pi : (l_1 \land \dots \land l_n) \ra \bot$.
-Carcara will check each step in $\pi$ and, if they are not invalid, will replace step $S$ in the original proof by a proof of the form:
+Carcara will check this subproof and then replace step $S$ in the original proof by a proof of the form:
 \begin{lstlisting}[language=SMT,caption={Elaboration of $\tt{lia\_generic}$},label={lst:elab_lia}]
 (anchor :step S.t_m+1)
 (assume S.h_1 l1)
@@ -147,6 +151,3 @@ Carcara will check each step in $\pi$ and, if they are not invalid, will replace
 (step S (cl (not l1) ... (not ln)) :rule resolution :premises (S.t_m+1 S.t_m+2))
 \end{lstlisting}
 
-We decided to leverage the elaboration process of $\tt{lia\_generic}$ performed by Carcara,
-as doing otherwise would require implementing Fourier-Motzkin elimination for integers, as demonstrated in \cite{omegatest,micromega} -
-and therefore reimplementing the work done by the solver.
