@@ -1,3 +1,7 @@
+% Stop bibtex from complaining about an empty note for unpublished
+% Work around explained here: https://tex.stackexchange.com/questions/40189/stop-bibtex-from-complaining-about-an-empty-note
+@preamble{ " \newcommand{\noop}[1]{} " }
+
 @inproceedings{ordered-rw-confluence,
 author = {Martin, Ursula and Nipkow, Tobias},
 title = {Ordered rewriting and confluence},
@@ -210,13 +214,42 @@ pages="102--117",
   title =	{{Translating HOL-Light proofs to Coq}},
   booktitle = {25rd Intl. Conf. Logic for Programming, Artificial Intelligence and Reasoning (LPAR-25)},
   year =	{2024},
-address = "Mauritius",
-publisher = "EPiC Series in Computing",
-pages = "18 pages",
+  address = "Mauritius",
+  publisher = "EPiC Series in Computing",
+  pages = "18 pages",
 }
 
 @unpublished{intuitype,
 	author = {Per Martin{-}L\"{o}f},
 	title = {Intuitionistic Type Theory},
-	year = {1980}
+	year = {1980},
+  note = {\noop{}}
+}
+
+@book{Schrijver:lia,
+author = {Schrijver, Alexander},
+title = {Theory of linear and integer programming},
+year = {1986},
+isbn = {0471908541},
+publisher = {John Wiley \& Sons, Inc.},
+address = {USA}
+}
+
+@misc{dowek:classical,
+      title={On the definition of the classical connectives and quantifiers}, 
+      author={Gilles Dowek},
+      year={2016},
+      eprint={1601.01782},
+}
+
+@InProceedings{trs-rational,
+author="Contejean, Evelyne
+and March{\'e}, Claude
+and Rabehasaina, Landy",
+title="Rewrite systems for natural, integral, and rational arithmetic",
+booktitle="Rewriting Techniques and Applications",
+year="1997",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="98--112",
 }

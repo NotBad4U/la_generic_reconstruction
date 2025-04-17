@@ -34,6 +34,8 @@ In the following, we designate the SMT-LIB problem as the \emph{input problem}.
 
 We will use the input problem shown in the top part of \cref{lst:smtexampleinput} with its Alethe proof (found by cvc5) in the bottom part as a running example to provide an overview of Alethe concepts and to illustrate our reconstruction of linear arithmetic step in Lambdapi.
 
+\subsection{The Alethe Language}
+
 An Alethe proof trace inherits the declarations of its input problem. All symbols (sorts, functions, assertions, etc.) declared or defined in the input problem remain declared or defined, respectively. Furthermore, the syntax for terms, sorts, and annotations uses the syntactic rules defined in SMT-LIB \cite[\S 3]{smtlib} and the SMT signature context defined in \cite[\S 5.1 and \S 5.2]{smtlib}.
 In the following we will represent an Alethe step as
 
@@ -73,6 +75,8 @@ a directed acyclic graph. A rule might also depend on a list of arguments \color
     la\_disequality & $t_1 \approx t_2 \lor \neg (t_1 \geq t_2) \lor \neg (t_2 \geq t_1)$ \\
     la\_totality & $t_1 \geq t_2 \lor t_2 \geq t_1$ \\
     la\_tautology & A trivial linear tautology \\
+    la\_mult\_pos & $t_1 > 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie t_1 * t_3$ and $\bowtie \in \{<, >, \geq, \leq, =\}$ \\
+    la\_mult\_neg & $t_1 < 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie_{inv} t_1 * t_3$ \\
     la\_rw\_eq & $(t \approx u) \approx (t \geq u \land u \geq t)$ \\
     div\_simplify & Simplification of division. \\
     prod\_simplify & Simplification of products. \\
@@ -89,18 +93,36 @@ We now have the key components to explain the guiding proof in the bottom part o
 The proofs starts with \tt{assume} steps \tt{a0}, \tt{a1}, \tt{a2} that restate the assertions from the \textit{input problem} (\cref{lst:smtexampleproof}).
 Step \tt{t1} transforms disjunction into clause by using the Alethe rule \tt{or}.
 Steps \tt{t2} and \tt{t5} are tautologies introduced by the main rule \tt{la\_generic}
-in LA logic and used also in LIA logic, where \colorbox{green!30}{$\neg l_1, \neg l_2,\dots, \neg l_n$} are linear inequalities. Checking the validity of this clause amounts to checking the unsatisfiability of the
-system of linear equations e.g. $x < 3$ and $x = 2$ in \tt{t2}. A coefficient for each inequality are pass as arguments e.g. $(\frac{1}{1},\frac{1}{1})$ in \tt{t2}.
+in Linear Real Arithmetic (LRA) logic and used also in LIA logic, where \colorbox{green!30}{$\neg l_1, \neg l_2,\dots, \neg l_n$} represent linear inequalities. These logics operate over
+closed linear over arbitrary expansions of the \lstinline[language=SMT]{Real} signature (resp. \lstinline[language=SMT]{Int}).
+The \lstinline[language=SMT]{Real} terms in \tt{LRA} logic are Reals signature with free constant symbols, but containing only linear atoms, that is, 
+atoms with no occurrences of the function symbols \lstinline[language=SMT]{*} and \lstinline[language=SMT]{/} except in coefficient multiplications—specifically, terms of the form 
+$c$, \lstinline[language=SMT]{(* c x)}, or \lstinline[language=SMT]{(* x c)}  where \tt{x} is a free constant and  \tt{c} is an integer or rational coefficient.
+Similarly, the \lstinline[language=SMT]{Int} terms in \tt{LIA} logic are closed formulas built over an arbitrary expansion of the
+Ints signature with free constant symbols, but whose terms of sort Int  are all linear, that is, have no occurrences of the function symbols\lstinline[language=SMT]{*}, \lstinline[language=SMT]{/}, \lstinline[language=SMT]{div}, \lstinline[language=SMT]{mod}, and \lstinline[language=SMT]{abs}
+, except terms with coefficients are also allowed, that is, terms of the form \tt{c}, \lstinline[language=SMT]{(* c x)}, or \lstinline[language=SMT]{(* x c)}
+where \tt{x} is a free constant and \tt{c} is a term of the form \lstinline[language=SMT]{n} or \lstinline[language=SMT]{(- n)} for some numeral \tt{n}.
+
+
+Checking the validity of this clause amounts to checking the unsatisfiability of the system of linear equations e.g. $x < 3$ and $x = 2$ in \tt{t2}.
+A coefficient for each inequality are pass as arguments e.g. $(\frac{1}{1},\frac{1}{1})$ in \tt{t2}.
 Steps \tt{t3} (and \tt{t4}) applies the \colorbox{purple!30}{\texttt{resolution}} rule to the premises \tt{a1}, \tt{t2} (respectively \tt{t1} \tt{t3}).
-Finally, the step \texttt{t6} concludes the proof by generating the empty clause $\bot$, concretely denoted as \kw{(cl)} in \cref{lst:smtexampleproof}. %(line 8) 
+Finally, the step \texttt{t6} concludes the proof by generating the empty clause $\bot$, concretely denoted as \kw{(cl)} in \cref{lst:smtexampleproof}.
 Notice that the contexts \colorbox{blue!30}{$\Gamma$} of each step are all empty in this proof.
 
+\subsection{Checking Alethe arithmetic step}
 
-Proofs for linear arithmetic steps use a number of straightforward rules listed in \cref{table:linear-arith-rules}, such as \tt{la\_totality} $(t_1 \leq t_2 \lor t_2 \geq t_1)$
-and the main rules \tt{la\_generic} and \tt{lia\_generic}. The \tt{lia\_generic} rule takes the same form as
-\tt{la\_generic}, without the additional coefficients. Since this rule can introduce a disjunction of arbitrary linear integer inequalities without any additional hints, proof checking can be NP-hard.
-Although the \tt{la\_generic} rule seems primarily designed for LA logic, it is also employed in LIA proofs when all variables in the (in)equalities are integer-sorted.
-While it can produce rational coefficients, it is rarely used in practice with CVC5 proofs.
+Proofs for linear arithmetic steps use a number of straightforward rules listed in \cref{table:linear-arith-rules}, such as \tt{la\_totality} $(t_1 \leq t_2 \lor t_2 \geq t_1)$.
+Simplification rules such as \tt{sum\_simplify} transform arithmetic formulas by applying equivalence-preserving operations repeatedly until a fixed point is reached; these operations are no more complex than constant folding.
+The primary rules are \tt{la\_generic} and \tt{lia\_generic}, both introduce a tautologous disjunction of linear inequalities. The \tt{lia\_generic} is structurally similar to \tt{la\_generic}, but omits the coefficients.
+Since this rule can introduce a disjunction of arbitrary linear integer inequalities without any additional hints, proof checking is \emph{NP-complete} \cite{Schrijver:lia}.
+While \tt{la\_generic rule} is primarily intended for LRA logic, it is also applied in LIA proofs when all variables in the (in)equalities are of integer sort.
+Although the rule may introduce rational coefficients, they often reduce to integers—as shown in \cref{lst:smtexampleproof}, where the coefficients are $(\frac{1}{1}, \frac{1}{1})$.
+Cases where coefficients cannot be reduced to integers are rare in practice.
+
+Although the sort \lstinline[language=SMT]{Real} is not currently defined in our Lambdapi environment, it is entirely feasible to define them in Lambdapi. However, in this work we focus exclusively on reconstructing proofs within the \texttt{LIA} (Linear Integer Arithmetic) logic.
+In \tt{LIA}, rational numbers only appear solely as coefficients. Any finite set of such rational coefficients can be transformed into integers by multiplying each by the least common multiple (LCM) of their denominators.
+Thus, defining \lstinline[language=SMT]{Int} suffices to reconstruct proofs from \tt{LIA} input problem.
 
 \section{Lia elaboration}
 
@@ -113,7 +135,7 @@ While these steps are considered holes, they typically involve simple simplifica
 
 In detail, the elaboration method, when encountering a $\tt{lia\_generic}$ step S concluding the negated inequalities $ \neg l_1 \lor \dots \neg l_n$ , generates an SMT-LIB problem asserting $l_1 \land \dots \land l_n$ and invokes \emph{cvc5} on it, expecting an Alethe proof $\pi : (l_1 \land \dots \land l_n) \ra \bot$.
 Carcara will check each step in $\pi$ and, if they are not invalid, will replace step $S$ in the original proof by a proof of the form:
-\begin{lstlisting}[language=SMT,caption={Elaboration of $\tt{lia\_generic}$},label={lst:smtexampleinput}]
+\begin{lstlisting}[language=SMT,caption={Elaboration of $\tt{lia\_generic}$},label={lst:elab_lia}]
 (anchor :step S.t_m+1)
 (assume S.h_1 l1)
 ...
