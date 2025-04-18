@@ -34,7 +34,7 @@ In the following, we designate the SMT-LIB problem as the \emph{input problem}.
 
 We will use the input problem shown in the top part of \cref{lst:smtexampleinput} with its Alethe proof (found by cvc5) in the bottom part as a running example to provide an overview of Alethe concepts and to illustrate our reconstruction of linear arithmetic step in Lambdapi.
 
-\subsection{The Alethe Language}
+\subsection{Alethe Trace Format Overview}
 
 An Alethe proof trace inherits the declarations of its input problem. All symbols (sorts, functions, assertions, etc.) declared or defined in the input problem remain declared or defined, respectively. Furthermore, the syntax for terms, sorts, and annotations uses the syntactic rules defined in SMT-LIB \cite[\S 3]{smtlib} and the SMT signature context defined in \cite[\S 5.1 and \S 5.2]{smtlib}.
 In the following we will represent an Alethe step as
@@ -93,28 +93,120 @@ We now have the key components to explain the guiding proof in the bottom part o
 The proofs starts with \tt{assume} steps \tt{a0}, \tt{a1}, \tt{a2} that restate the assertions from the \textit{input problem} (\cref{lst:smtexampleproof}).
 Step \tt{t1} transforms disjunction into clause by using the Alethe rule \tt{or}.
 Steps \tt{t2} and \tt{t5} are tautologies introduced by the main rule \tt{la\_generic}
-in Linear Real Arithmetic (LRA) logic and used also in LIA logic, where \colorbox{green!30}{$\neg l_1, \neg l_2,\dots, \neg l_n$} represent linear inequalities. These logics operate over
-closed linear over arbitrary expansions of the \lstinline[language=SMT]{Real} signature (resp. \lstinline[language=SMT]{Int}).
-The \lstinline[language=SMT]{Real} terms in \tt{LRA} logic are Reals signature with free constant symbols, but containing only linear atoms, that is, 
-atoms with no occurrences of the function symbols \lstinline[language=SMT]{*} and \lstinline[language=SMT]{/} except in coefficient multiplications—specifically, terms of the form 
-$c$, \lstinline[language=SMT]{(* c x)}, or \lstinline[language=SMT]{(* x c)}  where \tt{x} is a free constant and  \tt{c} is an integer or rational coefficient.
-Similarly, the \lstinline[language=SMT]{Int} terms in \tt{LIA} logic are closed formulas built over an arbitrary expansion of the
-Ints signature with free constant symbols, but whose terms of sort Int  are all linear, that is, have no occurrences of the function symbols\lstinline[language=SMT]{*}, \lstinline[language=SMT]{/}, \lstinline[language=SMT]{div}, \lstinline[language=SMT]{mod}, and \lstinline[language=SMT]{abs}
-, except terms with coefficients are also allowed, that is, terms of the form \tt{c}, \lstinline[language=SMT]{(* c x)}, or \lstinline[language=SMT]{(* x c)}
-where \tt{x} is a free constant and \tt{c} is a term of the form \lstinline[language=SMT]{n} or \lstinline[language=SMT]{(- n)} for some numeral \tt{n}.
+in Linear Real Arithmetic (LRA) logic and used also in LIA logic, where \colorbox{green!30}{$\neg l_1, \neg l_2,\dots, \neg l_n$} represent linear inequalities.
+These logics use closed linear formulas over the \lstinline[language=SMT]{Real} signature and \lstinline[language=SMT]{Int} respectively.
+The \lstinline[language=SMT]{Real} terms in \tt{LRA} logic are built over the Reals signaturefrom SMT-LIB with free constant symbols, but containing only linear atoms; that is
+atoms with no occurrences of the function symbols \lstinline[language=SMT]{*} and \lstinline[language=SMT]{/}, except in coefficient multiplications—specifically, terms of the form 
+\lstinline[language=SMT]{c}, \lstinline[language=SMT]{(* c x)}, or \lstinline[language=SMT]{(* x c)}  where \lstinline[language=SMT]{x} is a free constant and  \lstinline[language=SMT]{c} is an integer or rational coefficient.
+Similarly, the \lstinline[language=SMT]{Int} terms in \tt{LIA} logic are closed formulas built over the
+Ints signature with free constant symbols, but whose terms are also all linear, such that there is no occurrences of the function symbols \lstinline[language=SMT]{*}, \lstinline[language=SMT]{/}, \lstinline[language=SMT]{div}, \lstinline[language=SMT]{mod}, and \lstinline[language=SMT]{abs}
+, except terms with coefficients are also allowed, that is, terms of the form \lstinline[language=SMT]{c}, \lstinline[language=SMT]{(* c x)}, or \lstinline[language=SMT]{(* x c)}
+where \lstinline[language=SMT]{x} is a free constant and lstinline[language=SMT]{c} is a term of the form \lstinline[language=SMT]{n} or \lstinline[language=SMT]{(- n)} for some numeral \tt{n}.
+A linear inequality is of term of the form
 
+\begin{equation}
+\sum_{i=0}^{n}c_i\times{}t_i + d_1\bowtie \sum_{i=n+1}^{m} c_i\times{}t_i + d_2
+\label{eqn:inequality}
+\end{equation}
 
-Checking the validity of this clause amounts to checking the unsatisfiability of the system of linear equations e.g. $x < 3$ and $x = 2$ in \tt{t2}.
+where $\bowtie\;\in \{=, <, >, \leq, \geq\}$, where $m\geq n$, $c_i, d_1, d_2$ are either integer or real
+constants, and for each $i$ $c_i$ and $t_i$ have the same sort.
+Checking the validity of this clause amounts to checking the unsatisfiability of the system of linear equations (we provide more details in \cref{ssect:la-in-alethe}) e.g. $x < 3$ and $x = 2$ in \tt{t2}.
 A coefficient for each inequality are pass as arguments e.g. $(\frac{1}{1},\frac{1}{1})$ in \tt{t2}.
 Steps \tt{t3} (and \tt{t4}) applies the \colorbox{purple!30}{\texttt{resolution}} rule to the premises \tt{a1}, \tt{t2} (respectively \tt{t1} \tt{t3}).
 Finally, the step \texttt{t6} concludes the proof by generating the empty clause $\bot$, concretely denoted as \kw{(cl)} in \cref{lst:smtexampleproof}.
 Notice that the contexts \colorbox{blue!30}{$\Gamma$} of each step are all empty in this proof.
 
-\subsection{Checking Alethe arithmetic step}
+\subsection{Linear arithmetic in Alethe}
+\label{ssect:la-in-alethe}
 
-Proofs for linear arithmetic steps use a number of straightforward rules listed in \cref{table:linear-arith-rules}, such as \tt{la\_totality} $(t_1 \leq t_2 \lor t_2 \geq t_1)$.
-Simplification rules such as \tt{sum\_simplify} transform arithmetic formulas by applying equivalence-preserving operations repeatedly until a fixed point is reached; these operations are no more complex than constant folding.
-The primary rules are \tt{la\_generic} and \tt{lia\_generic}, both introduce a tautologous disjunction of linear inequalities. The \tt{lia\_generic} is structurally similar to \tt{la\_generic}, but omits the coefficients.
+Proofs for linear arithmetic steps use a number of straightforward rules listed in \cref{table:linear-arith-rules}, such as \tt{la\_totality}: $(t_1 \leq t_2 \lor t_2 \geq t_1)$.
+Simplification rules \tt{*\_simplify} such as \tt{sum\_simplify} transform arithmetic formulas by applying equivalence-preserving operations repeatedly until a fixed point is reached; these operations are no more complex than constant folding.
+
+As we described in \cite{ColtellacciMD24}, the linear arithmetic tautology rules \tt{la\_disequality}, \tt{la\_totality} and \tt{la\_mult\_*} are encoded as lemmas in our embedding of Alethe in Lambdapi.
+The simplification rule \tt{comp\_simplify} is encoded as a lemma for each rewrite case and applied multiple times.
+We do not support the \tt{*\_simplify} rules in this work, nor the \tt{la\_tautology} rule, because cvc5 did not generate any proofs using them for the SMT-LIB benchmarks.
+Furthermore, since cvc5 extend the Alethe format with the RARE simplification rules \cite{rare} and does not use the one of the Alethe standard, we did not included them.
+\todo[ac]{should I say more?}
+
+A different approach is taken for the primary rules \tt{*\_generic},as they describe an algorithm.
+A step of the rule \tt{la\_generic} represents a tautological clause of linear disequalities.  It can be checked by showing that the conjunction of
+the negated disequalities is unsatisfiable. After the application of some strengthening rules, the resulting conjunction is unsatisfiable,
+even if \lstinline[language=SMT]{Int} variables are assumed to be \lstinline[language=SMT]{Real} variables.
+Let $\varphi_1,\dots, \varphi_n$ be linear inequalities and $a_1, \dots, a_n$ rational numbers, then a \tt{la\_generic} step has the general form
+
+\[
+\begin{matrix*}[c]
+  i. & \ctxsep \quad & \varphi_1 , \dots , \varphi_n & \quad \tt{la\_generic}  & [a_1, \dots, a_n] \\
+\end{matrix*}
+\]
+
+The constants $a_i$ are of sort \tt{Real} and must be printed using one of the productions $\grNT{rational}$ $\grNT{decimal}$, $\grNT{nonpositive\_decimal}$ described in \cref{app:alethe}.
+To check the unsatisfiability of the negation of $\varphi_1, \dots, \varphi_n$ one performs the following steps for each literal. For each $i$, let $\varphi := \varphi_i$, $a := a_i$ and
+we write $s1 \bowtie s2$ for \cref{eqn:inequality}.
+
+\begin{enumerate}
+    \item If $\varphi = s_1 > s_2$, then let $\varphi := s_1 \leq s_2$.
+      If $\varphi = s_1 \geq s_2$, then let $\varphi := s_1 < s_2$.
+      If $\varphi = s_1 < s_2$, then let $\varphi := s_1 \geq s_2$.
+      If $\varphi = s_1 \leq s_2$, then let $\varphi := s_1 > s_2$. This negates
+      the literal.
+    
+    \item If $\varphi = \neg (s_1 \bowtie s_2)$, then let $\varphi := s_1 \bowtie s_2$.
+    
+    \item If $\varphi = s_1 < s_2$, then let $\varphi :=   - s_1 > - s_2$.
+      If $\varphi = s_1 \leq s_2$, then let $\varphi :=  s_1 \geq - s_2$.
+      We want a canonical form that use only the operators $>, \geq$ and =.
+
+    \item Replace $\varphi$ by $\sum_{i=0}^{n}c_i\times{}t_i - \sum_{i=n+1}^{m} c_i\times{}t_i
+    \bowtie d$ where $d := d_2 - d_1$.
+    
+    \item \label{la_generic:str}Now $\varphi$ has the form $s_1 \bowtie d$. If all
+    variables in $s_1$ are integer sorted: replace $\bowtie d$ according to
+    the table below.
+
+    \begin{center}
+    \begin{tabular}{r|l|l}
+        $\bowtie$  & If $d$ is an integer  & Otherwise \\
+        \hline
+        $>$        & $\geq d + 1$  & $\geq \lfloor d\rfloor + 1$  \\
+        $\geq$     & $\geq d$      & $\geq \lfloor d\rfloor + 1$  \\
+    \end{tabular}
+    \end{center}
+
+    \item If all variables of $\varphi$ are Int and coefficient $a_1 \dots a_n \in \mathbb{Q}$,
+    then $a \coloneq a \times lcm(a_1 \dots a_n)$ so $a \in \mathbb{Z}$ now.
+    
+    \item If $\bowtie$ is $=$, then replace $\varphi$ by
+    $\sum_{i=0}^{m}a\times{}c_i\times{}t_i = a\times{}d$, otherwise replace it by
+    $\sum_{i=0}^{m}|a|\times{}c_i\times{}t_i = |a|\times{}d$. 
+\end{enumerate}
+
+Finally, the sum of the resulting literals is trivially contradictory.
+The sum
+\[
+    \sum_{k=1}^{o}\sum_{i=1}^{m^o}c_i^k*t_i^k \bowtie \sum_{k=1}^{o}d^k
+\]
+where $c_i^k$ and $t_i^k$ are the constant and term from the literal $varphi_k$, and $d^k$ is the constant $d$ of $varphi_k$.
+The operator $\bowtie$ is $=$ if all operators are $=$, $>$ if all are either $=$ or $>$, and $\geq$ otherwise. The $a_i$ must be such
+that the sum on the left-hand side is $0$ and the right-hand side is $>0$ (or $\geq 0$ if $\bowtie$ is $>$).
+
+The step 3 has been added by our own, as the subsequent steps in the original algorithm are designed for $>$ and $\geq$ and do not clearly address how to handle $<$ and $\leq$.
+Additionally, we added step 6 to facilitate the reconstruction process.
+
+\begin{example}
+Consider the $\tt{la\_generic}$ step in the logic \tt{LIA}:
+\begin{lstlisting}[language=SMT,label={lst:smtexampleinput}]
+(step t11 (cl (not (<= f 0)) (<= (+ 1 (* 4 f)) 1))
+  :rule la_generic :args (1.0 1/4))
+\end{lstlisting}
+After step 4, we get $- f > 0 ~\land~ 4 \times f > 0$. The step 5 applied and we can strengthen this to
+$- f \geq 0 ~\land~ 4 \times f \geq 1$ and after multiplication of the normalized coefficients at step 6, we get $4 \times(- f) \geq 0 ~\land~ 4 \times f \geq 1$.
+Which sums to the contradiction  $0 \geq 1$. 
+\end{example}
+
+
+The \tt{lia\_generic} is structurally similar to \tt{la\_generic}, but omits the coefficients.
 Since this rule can introduce a disjunction of arbitrary linear integer inequalities without any additional hints, proof checking is \emph{NP-complete} \cite{Schrijver:lia}.
 While \tt{la\_generic rule} is primarily intended for LRA logic, it is also applied in LIA proofs when all variables in the (in)equalities are of integer sort.
 Although the rule may introduce rational coefficients, they often reduce to integers—as shown in \cref{lst:smtexampleproof}, where the coefficients are $(\frac{1}{1}, \frac{1}{1})$.
@@ -126,7 +218,7 @@ Thus, defining \lstinline[language=SMT]{Int} suffices to reconstruct proofs from
 
 \section{The approach to reconstruct lia\_generic step}
 
-The \tt{lia\_generic} still represent a challenge in our reconstruction compared to $\tt{la\_generic}$, because the coefficients are not provided by the solver in the trace i.e. \colorbox{orange!30}{$[a_1 \dots a_r]$} is empty.
+The \tt{lia\_generic} still represent a challenge in our reconstruction because the coefficients are not provided by the solver in the trace i.e. \colorbox{orange!30}{$[a_1 \dots a_r]$} is empty.
 We decided to leverage the elaboration process of $\tt{lia\_generic}$ performed by Carcara, as doing otherwise would require implementing Fourier-Motzkin elimination for integers, as demonstrated in \cite{omegatest,micromega} -
 and therefore reimplementing the work done by the solver.
 
