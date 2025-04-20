@@ -96,3 +96,125 @@
 &\tt{compare}~x~y \coloneq \tt{compare\_acc}~x~\tt{Eq}~y \\
 \end{align*}
   
+\subsection{Confluence of the rewriting rules of integers and positive binary number}
+\label{app:confluence-int-pos}
+
+
+\begin{lstlisting}[language=trs, caption=Rewriting rule of $\bb{Z}$ and $\bb{P}$ in the TRS format]
+(VAR
+  a: Z
+  b: Z
+  x : P
+  q : P
+  y : P
+)
+(RULES
+  ~(Z0) -> Z0
+  ~(Zpos(p)) -> Zneg(p)
+  ~(Zneg(p)) -> Zpos(p)
+  ~(~(a)) -> a
+
+  double(Z0) -> Z0
+  double(Zpos(p)) -> Zpos(O(p))
+  double(Zneg(p)) -> Zneg(O(p))
+  
+  succ_double(Z0) -> Zpos(H)
+  succ_double(Zpos(p)) -> Zpos(I(p))
+  succ_double(Zneg(p)) -> Zneg(pos_pred_double(p))
+  
+  pred_double(Z0) -> Zneg(H)
+  pred_double(Zpos(p)) -> Zpos(pos_pred_double(p))
+  pred_double(Zneg(p)) -> Zneg(I(p))
+
+  sub(I(p), I(q)) -> double(sub(p, q))
+  sub(I(p), O(q)) -> succ_double(sub(p, q))
+  sub(I(p), H) -> Zpos(O(p))
+  sub(O(p), I(q)) -> pred_double(sub(p, q))
+  sub(O(p), O(q)) -> double(sub(p, q))
+  sub(O(p), H) -> Zpos(pos_pred_double(p))
+  sub(H, I(q)) -> Zneg(O(q))
+  sub(H, O(q)) -> Zneg(pos_pred_double(q))
+  sub(H, H) -> Z0
+
+  +(Z0,a) -> a
+  +(a,Z0) -> a
+  +(Zpos(x), Zpos(y)) -> Zpos(add(x, y))
+  +(Zpos(x), Zneg(y)) -> sub(x, y)
+  +(Zneg(x), Zpos(y)) -> sub(y, x)
+  +(Zneg(x), Zneg(y)) -> Zneg(add(x, y))
+  
+  mult(Z0, a) -> Z0
+  mult(a, Z0) -> Z0
+  mult(Zpos(x), Zpos(y)) -> Zpos(mul(x, y))
+  mult(Zpos(x), Zneg(y)) -> Zneg(mul(x, y))
+  mult(Zneg(x), Zpos(y)) -> Zneg(mul(x, y))
+  mult(Zneg(x), Zneg(y)) -> Zpos(mul(x, y))
+
+
+  succ(I(x)) -> O(succ(x))
+  succ(O(x)) -> I(x)
+  succ(H) -> O(H)
+  add(I(x), I(q)) -> O(addcarry(x, q))
+  add(I(x), O(q)) -> I(add(x, q))
+  add(O(x), I(q)) -> I(add(x, q))
+  add(O(x), O(q)) -> O(add(x, q))
+  add(x, H) -> succ(x)
+  add(H, y) -> succ(y)
+
+  addcarry(I(x), I(q)) -> I(addcarry(x, q))
+  addcarry(I(x), O(q)) -> O(addcarry(x, q))
+  addcarry(O(x), I(q)) -> O(addcarry(x, q))
+  addcarry(O(x), O(q)) -> I(add(x, q))
+  addcarry(x, H) -> add(x, O(H))
+  addcarry(H, y) -> add(O(H), y)
+  
+  pos_pred_double(I(x)) -> I(O(x))
+  pos_pred_double(O(x)) -> I(pos_pred_double(x))
+  pos_pred_double(H) -> H
+  
+  mul(I(x), y) -> add(x, O(mul(x,y)))
+  mul(O(x), y) -> O(mul(x, y))
+  mul(H, y) -> y
+)
+\end{lstlisting}
+
+
+% Proof:
+%  Church Rosser Transformation Processor (no redundant rules):
+%   strict:
+   
+%   weak:
+   
+% critical peaks: 4
+%   add(O(H()),H()) <-6|[]- addcarry(H(),H()) -7|[]-> add(H(),O(H()))
+%   add(H(),O(H())) <-7|[]- addcarry(H(),H()) -6|[]-> add(O(H()),H())
+%   succ(H()) <-12|[]- add(H(),H()) -13|[]-> succ(H())
+%   succ(H()) <-13|[]- add(H(),H()) -12|[]-> succ(H())
+
+%   Church Rosser Transformation Processor (critical pair closing system, Thm 2.4):
+%   add(x,H()) -> succ(x)
+%   add(H(),y) -> succ(y)
+%   critical peaks: joinable
+%   Matrix Interpretation Processor: dim=1
+    
+%     interpretation:
+%     [succ](x0) = 4x0,
+    
+%     [add](x0, x1) = 4x0 + 4x1 + 2,
+    
+%     [H] = 4
+%     orientation:
+%     add(x,H()) = 4x + 18 >= 4x = succ(x)
+    
+%     add(H(),y) = 4y + 18 >= 4y = succ(y)
+%     problem:
+    
+%     Qed
+\begin{lemma}[Confluence]
+\begin{proof}
+CSI automatically proves the confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$ by giving the polynomial interpretation:
+\begin{align*}
+[\tt{succ}(x)] = 4*x & &[\tt{add}(x, y)] = 4 * x + 4 * y + 2  & &[{\tt{H}}] = 4 \\
+\end{align*}
+\end{proof} 
+\end{lemma}

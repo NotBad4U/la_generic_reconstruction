@@ -18,6 +18,24 @@
 
 \lstset{style=mystyle}
 
+\lstdefinelanguage{trs}
+{
+  numbers=left,
+  numbersep=5pt,
+  inputencoding=utf8,
+  extendedchars=true,
+  numberstyle=\footnotesize,
+  tabsize=2,
+  basicstyle={\ttfamily\scriptsize\upshape},
+  keywords=[1]{RULES, VAR, ->},
+  alsoletter={*,/,+},
+  sensitive=true,
+  keywordstyle={[1]\bfseries\color{ForestGreen}},
+  string=[b]{"},
+  stringstyle=\color{orange},
+  showstringspaces=false,
+}
+
 \lstdefinelanguage{SMT}
 {
   numbers=left,

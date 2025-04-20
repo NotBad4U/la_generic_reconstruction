@@ -40,17 +40,7 @@ The typing rules of $\lpm$ are the one of  $\lambda\Pi$ \cite[\S 2]{lf}, except 
 We now provide an overview of the encoding of Alethe linear integers arithmetic in Lambdapi.
 
 \subsection{Encoding of Integers in Lambdapi}
-The definition we use of integers in Lambdapi in \cref{fig:sorts-constructors} follows a common encoding found in many other theories, including the one adopted in the Rocq standard library \cite{Rocq-refman}.
-First, the type $\bb{P}$  is an inductive type representing strictly positive integers in binary form.
-Starting from 1 (represented by constructor \tt{H}), one can add a new least significant digit via the constructor \tt{O} (digit 0) or constructor \tt{I} (digit 1). 
-The type $\bb{Z}$ is an inductive type representing integers in binary form.
-An integer is either zero (with constructor \tt{Z0}) or a strictly positive number \tt{Zpos} (coded as a $\bb{P}$) or a strictly negative number \tt{Zneg} (whose opposite is stored as a $\bb{P}$ value).
-%
-As discussed in our previous work \cite{ColtellacciMD24}, $\lpm$ does not support quantiﬁy over a variable of type $\type$. More precisely, it is not possible to assign the type $\Pi X : \type,(X \ra \prop) \ra \prop$ to the universal quantifier $\forall$.
-To address this, we introduce a constant $\set : \type$ for the types of object-terms, and a constant ${\el}$ to embed the terms of type $\set$ into terms of type $\type$ giving us the quantifier $\forall: \Pi x: \set, (\el~x \ra \prop) \ra \prop$.
-To enable quantification over types such as integers, positive binary numbers, booleans, and comparison results, we introduce a constant of type $\set$ (e.g. $\tt{int}: \set$) that represents codes for these types — similar to the Tarski-style universe \cite[\S Universes]{intuitype},
-where types are represented by elements of a base type and interpreted via the decoding function. In our setting, the decoding function $\el$  is realized through a rewriting rule that reduces the term to its corresponding type; for example, $\el~\tt{int} \re \bb{Z}$.
-The comparison datatype $\tt{Comp}$ is utilized to define the decidable equality $\doteq$ between the $\bb{Z}$ and the function \tt{cmp} for $\bb{P}$ (as defined in \cref{app:lambdapi-func-def}).
+
 
 \begin{figure}
 \centering
@@ -65,6 +55,19 @@ The comparison datatype $\tt{Comp}$ is utilized to define the decidable equality
 \caption{Overview of sorts, constructors, constants, and element relations}
 \label{fig:sorts-constructors}
 \end{figure}
+
+The definition we use of integers in Lambdapi in \cref{fig:sorts-constructors} follows a common encoding found in many other theories, including the one adopted in the Rocq standard library \cite{Rocq-refman}.
+First, the type $\bb{P}$  is an inductive type representing strictly positive integers in binary form.
+Starting from 1 (represented by constructor \tt{H}), one can add a new least significant digit via the constructor \tt{O} (digit 0) or constructor \tt{I} (digit 1). 
+The type $\bb{Z}$ is an inductive type representing integers in binary form.
+An integer is either zero (with constructor \tt{Z0}) or a strictly positive number \tt{Zpos} (coded as a $\bb{P}$) or a strictly negative number \tt{Zneg} (whose opposite is stored as a $\bb{P}$ value).
+%
+As discussed in our previous work \cite{ColtellacciMD24}, $\lpm$ does not support quantiﬁy over a variable of type $\type$. More precisely, it is not possible to assign the type $\Pi X : \type,(X \ra \prop) \ra \prop$ to the universal quantifier $\forall$.
+To address this, we introduce a constant $\set : \type$ for the types of object-terms, and a constant ${\el}$ to embed the terms of type $\set$ into terms of type $\type$ giving us the quantifier $\forall: \Pi x: \set, (\el~x \ra \prop) \ra \prop$.
+To enable quantification over types such as integers, positive binary numbers, booleans, and comparison results, we introduce a constant of type $\set$ (e.g. $\tt{int}: \set$) that represents codes for these types — similar to the Tarski-style universe \cite[\S Universes]{intuitype},
+where types are represented by elements of a base type and interpreted via the decoding function. In our setting, the decoding function $\el$  is realized through a rewriting rule that reduces the term to its corresponding type; for example, $\el~\tt{int} \re \bb{Z}$.
+The comparison datatype $\tt{Comp}$ is utilized to define the decidable equality $\doteq$ between the $\bb{Z}$ and the function \tt{cmp} for $\bb{P}$ (as defined in \cref{app:lambdapi-func-def}).
+
 
 \begin{figure}
 \centering
@@ -130,9 +133,10 @@ The comparison datatype $\tt{Comp}$ is utilized to define the decidable equality
 &>: \bb{Z} \ra \bb{Z} \ra \prop  \coloneq \lambda x,\lambda y, \neg (x \leq y) & & \\
 \end{align*}
 
-The arithmetic operator such as \tt{add}, \tt{sub}, etc. in \cref{fig:arith-ops} are constant defined by rewriting rules.
-
-  
+The arithmetic operator such as \tt{add}, \tt{sub}, and others, as presented in \cref{fig:arith-ops} are constants defined by rewriting rules. In the following sections, we will refers 
+to the rewriting rules for integers as $\ra_\bb{Z}$ and positive binary numbers as $\ra_\bb{P}$.
+The confluence of the rewriting rules for the arithmetic of $\mathbb{Z}$ and $\mathbb{P}$ has been proven using CSI \cite{CSI}. A detailed proof of confluence can be found in \cref{app:confluence-int-pos}.
+The inequality operators for $\bb{Z}$ are predicates defined by rewriting rules over the decidable equality $\doteq$
 
 % \subsection{A Prelude Encoding for Alethe}
 % \label{sect:embedding}
