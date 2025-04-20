@@ -1,8 +1,8 @@
-\section{Reconstruction of \tt{la\_generic} step}
+\section{Reconstruction of \tt{la\_generic} step for LIA logic}
 \label{sect:recon-lambdapi}
 
-\subsection{Lambdapi}
-\label{ssect:lambdapi}
+\subsection{An Overview of Lambdapi}
+\label{ssect:lambdapi-overview}
 
 Lambdapi is an implementation of $\lambda\Pi$ modulo theory ($\lpm$) \cite{lambdapi}, an extension of the Edinburgh Logical Framework $\lambda\Pi$ \cite{lf}, a simply typed $\lambda$-calculus with dependent types. $\lpm$ adds user-defined higher-order rewrite rules. Its syntax is given by
 %
@@ -37,82 +37,161 @@ The typing rules of $\lpm$ are the one of  $\lambda\Pi$ \cite[\S 2]{lf}, except 
     \label{fig:lp-typing-rules}
   \end{figure}
 
-  We now provide an overview of our encoding of Alethe in Lambdapi. A more comprehensive version of the encoding is available in \cite{ColtellacciMD24}.
-
-\subsection{A Prelude Encoding for Alethe}
-\label{sect:embedding}
-
-\begin{definition}[Prelude Encoding]
-\label{def:defuniv}
-The signature $\Sigma$ of our encoding contains the following definitions and rewrite rules provided by the standard library of Lambdapi that we use to encode Alethe proofs:
-\begin{align*}
-&\set: \type & &\prop: \type \\
-&\el: \set \rightarrow \type  & &\prf : \prop \rightarrow \type \\
-&\mathop{\leadsto}: \set \rightarrow \set \rightarrow \set & &o: \set \\
-&\el\,(x \leadsto y) \hookrightarrow \el\,x \rightarrow \el\,y & &\el\,o  \hookrightarrow \prop \\
-\end{align*}
-\end{definition}
-
- The constants \set{} and \prop{} (lines 1 and 6) are type universes ``à la Tarski'' \cite[\S Universes]{intuitype} in $\lpm$.
- The type \set{} represents the universe of \textit{small types}, i.e.\ a subclass of types for which we can define equality.
- SMT sorts are represented in $\lpm$ as elements of type \set{}. Since elements of type \set{} are not types themselves, we also introduce a decoding function $\el: \set \rightarrow \type$ that interprets SMT sorts as $\lpm$ types.
- Thus, we represent the terms of sort \texttt{Bool} of SMT by elements of type $\el{}\,o$. The constructor $\leadsto$ is used to encode SMT functions and predicates.
-The type \prop{} represents the universe of propositions in $\lpm$. Like \set{}, elements of type \prop{} are not types themselves but are mapped to types by the decoding function $\prf{}: \prop \rightarrow \type$. By analogy with the Curry-de-Brujin-Howard isomorphism, it embeds propositions into types, mapping each proposition $A$ to the type $\prf{}~A$ of its proofs.
-
-\begin{figure}
-\begin{align*}
-&\tt{Clause}: \type & &\cal{F}: \tt{Clause} \ra \prop \\
-&\nil: \tt{Clause} & & \cal{F}~\nil \re \bot \\
-&\veedot: \prop \ra \tt{Clause}  \ra \tt{Clause} & & \cal{F}~x \veedot y \re x \lor^c (\cal{F}~y) \\
-&\pid (c : \tt{Clause}) \coloneqq \pic (\cal{F}~c) & &  \\
-\end{align*}
-\caption{The \tt{Clause} type and operations on clauses.}
-\end{figure}
-
-Alethe distinguishes between clauses that appear in steps, \colorbox{green!30}{(cl\,$l_1 \dots l_n$)} in \cref{eq:step}, and ordinary disjunction \cite[\S 4]{alethespec}.
-The syntax for clauses uses the \textcolor{purple}{\tt{cl}} operator, while disjunction is represented as the standard SMT-LIB \textcolor{purple}{\texttt{or}}.
-We define the type $\kw{Clause}$ that encodes an Alethe clause as a list of propositions. The constructor $\veedot$ prepends an element to a list, and $\nil$ is the empty list.
-Logically, clauses are interpreted as disjunctions via the function $\cal{F}$ defined by rewriting rules. For convenience, we also introduce the predicate $\pid$ asserting that a clause is provable.
-
-\subsection{Classical connectives, quantifiers and facts}
-
-Since SMT solvers are based on classical logic, we use the constructive connectives and quantifiers from the Lambdapi standard library and define the classical ones from them using the double-negation translation \cite{dowek:classical} as a definition.
-%
-\begin{align*}
-& \mathop{\pic} p \coloneqq \mathop{\prf{}} (\neg \neg p) \\
-& \mathop{=}:  \Pi {[a: \set]}, \el\, a \rightarrow \el\,a \rightarrow \prop \\
-& p \lor^c q \coloneqq  \neg \neg p \lor \neg \neg q \\
-& \forall^c \coloneqq \Pi {[a: \set]},  \Pi p: (\el\, a \ra \prop),  \forall \, x. \neg \neg  p\,x \\
-&\texttt{classic}:\  \Pi [p: \prop], \pic (p \lor^c \neg p) \\
-&\texttt{prop\_ext}:\  \Pi [p\,q: \prop], \pic (p \Leftrightarrow^c q ) \rightarrow \pic (p = q) \\
-\end{align*}
-
-Therefore, a step in an Alethe proof trace is represented as a proposition $\pic~p$, defined as the intuitionistic proof \prf{} of the doubly negated predicate.
-Equality over small types is parameterized over types
-$\el\,a$ for the type parameter $[a : \set{}]$ (the square brackets indicate that this parameter need not be given explicitly).
-We also define classical connectives, quantifiers, and the choice operator $\epsilon$ (\cite[\S 2.1]{alethespec}) as illustrated above.
-We prove the law of excluded middle and add the proposition of Boolean extensionality stating that classical equivalence coincides with equality over Booleans.
-SMT logic enjoys the property of propositional completeness (also referred to as propositional degeneracy) asserting that $\forall^c A,~(A = \top) \lor^c (A = \bot)$. Moreover, propositionally equivalent formulas are equal. We thus obtain the theorems
-\tt{classic} and \tt{prop\_ext}.
-\begin{align*}
-\end{align*}
+We now provide an overview of the encoding of Alethe linear integers arithmetic in Lambdapi.
 
 \subsection{Encoding of Integers in Lambdapi}
-
-The definition we use of integers in Lambdapi follows a common encoding found in many other theories, such as Rocq.
-First, the type $\mathbb{P}$  is an inductive type representing strictly positive integers in binary form.
+The definition we use of integers in Lambdapi in \cref{fig:sorts-constructors} follows a common encoding found in many other theories, including the one adopted in the Rocq standard library \cite{Rocq-refman}.
+First, the type $\bb{P}$  is an inductive type representing strictly positive integers in binary form.
 Starting from 1 (represented by constructor \tt{H}), one can add a new least significant digit via the constructor \tt{O} (digit 0) or constructor \tt{I} (digit 1). 
-The type $\mathbb{Z}$ is an inductive type representing integers in binary form.
-An integer is either zero (with constructor \tt{Z0}) or a strictly positive number \tt{Zpos} (coded as a $\mathbb{P}$) or a strictly negative number \tt{Zneg} (whose opposite is stored as a $\mathbb{P}$ value).
+The type $\bb{Z}$ is an inductive type representing integers in binary form.
+An integer is either zero (with constructor \tt{Z0}) or a strictly positive number \tt{Zpos} (coded as a $\bb{P}$) or a strictly negative number \tt{Zneg} (whose opposite is stored as a $\bb{P}$ value).
+%
+As discussed in our previous work \cite{ColtellacciMD24}, $\lpm$ does not support quantiﬁy over a variable of type $\type$. More precisely, it is not possible to assign the type $\Pi X : \type,(X \ra \prop) \ra \prop$ to the universal quantifier $\forall$.
+To address this, we introduce a constant $\set : \type$ for the types of object-terms, and a constant ${\el}$ to embed the terms of type $\set$ into terms of type $\type$ giving us the quantifier $\forall: \Pi x: \set, (\el~x \ra \prop) \ra \prop$.
+To enable quantification over types such as integers, positive binary numbers, booleans, and comparison results, we introduce a constant of type $\set$ (e.g. $\tt{int}: \set$) that represents codes for these types — similar to the Tarski-style universe \cite[\S Universes]{intuitype},
+where types are represented by elements of a base type and interpreted via the decoding function. In our setting, the decoding function $\el$  is realized through a rewriting rule that reduces the term to its corresponding type; for example, $\el~\tt{int} \re \bb{Z}$.
+The comparison datatype $\tt{Comp}$ is utilized to define the decidable equality $\doteq$ between the $\bb{Z}$ and the function \tt{cmp} for $\bb{P}$ (as defined in \cref{app:lambdapi-func-def}).
+
+\begin{figure}
+\centering
+\begin{align*}\label{eq:eq1}
+&\bb{Z}: \type & &\bb{P}: \type  & &\tt{Comp}: \type & &\bb{B}: \type \\
+&|~\tt{Z0}: \bb{Z} & &|~\tt{H} : \bb{P} & &|~\tt{Eq}: \tt{Comp} & &|~\tt{true}: \bb{B} \\
+&|~\tt{ZPos}: \bb{P} \ra \bb{Z} & &|~\tt{O}: \bb{P} \ra \bb{P} & &|~\tt{Lt}: \tt{Comp} & &|~\tt{false}: \bb{B} \\
+&|~\tt{ZNeg}: \bb{P} \ra \bb{Z} & &|~\tt{I}: \bb{P} \ra \bb{P} & &|~\tt{Gt}: \tt{Comp} & &\\
+&\tt{int}: \set & &\tt{pos}: \set & &\tt{comp}: \set & &\tt{bool}: \set \\
+&\el~\tt{int} \re \bb{Z} & &\el~\tt{pos} \re \bb{P} & &\el~\tt{comp} \re \tt{Comp} & &\el~\tt{comp} \re \bb{B}
+\end{align*}
+\caption{Overview of sorts, constructors, constants, and element relations}
+\label{fig:sorts-constructors}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\begin{align*}
+&+: \bb{Z} \ra \bb{Z} \ra \bb{Z} \\
+& \tt{Z0} + y \re y \\
+& x + \tt{Z0} \re \tt{Z0} \\
+& (\tt{Zpos x}) + (\tt{Zpos y}) \re (\tt{Zpos}~(\tt{add}~x~y))  \\
+& (\tt{Zpos x}) + (\tt{Zneg y}) \re (\tt{sub}~x~y)  \\
+& (\tt{Zneg x}) + (\tt{Zpos y}) \re (\tt{sub}~y~x)  \\
+& (\tt{Zneg x}) + (\tt{Zneg y}) \re \tt{Zpos}(\tt{add}~x~y)  \\
+\end{align*}
+\hfill
+\end{minipage}
+\begin{minipage}[t]{0.48\textwidth}
+\begin{align*}
+&\doteq : \bb{Z} \ra \bb{Z} \ra \tt{Comp} \\
+& \tt{Z0} \doteq \tt{Z0} \re \tt{Eq} \\
+& \tt{Z0} \doteq \tt{Zpos}~\_ \re \tt{Lt} \\
+& \tt{Z0} \doteq \tt{Zneg}~\_ \re \tt{Gt} \\
+& \tt{Zpos}~\_ \doteq \tt{Z0} \re \tt{Gt} \\
+& \tt{Zpos}~p \doteq \tt{Zpos}~q \re \tt{cmp}~p~q \\
+& \tt{Zpos}~\_ \doteq \tt{Zneg}~\_ \re \tt{Gt} \\
+& \tt{Zneg}~\_ \doteq \tt{Z0} \re \tt{Lt} \\
+& \tt{Zneg}~\_ \doteq \tt{Zpos}~\_ \re \tt{Lt} \\
+& \tt{Zneg}~p \doteq \tt{Zneg}~q \re \tt{cmp}~q~p \\
+\end{align*}
+\end{minipage}
+\caption{Decidable equality and $+$ operator definition for $\bb{Z}$}
+\label{fig:arith-ops}
+\end{figure}
+
+\[
+\begin{array}{l@{\hspace{4em}}l@{\hspace{4em}}l}
+\begin{aligned}
+  &\tt{isEq} : \tt{Comp} \ra \bb{B} \\
+  &\tt{isEq}~\tt{Eq} \re \tt{true} \\
+  &\tt{isEq}~\tt{Lt} \re \tt{false} \\
+  &\tt{isEq}~\tt{Gt} \re \tt{false} \\
+\end{aligned}
+&
+\begin{aligned}
+  &\tt{isLt} : \tt{Comp} \ra \bb{B} \\
+  &\tt{isLt}~\tt{Eq} \re \tt{false} \\
+  &\tt{isLt}~\tt{Lt} \re \tt{true} \\
+  &\tt{isLt}~\tt{Gt} \re \tt{false} \\
+\end{aligned}
+&
+\begin{aligned}
+  &\tt{isGt} : \tt{Comp} \ra \bb{B} \\
+  &\tt{isGt}~\tt{Eq} \re \tt{false} \\
+  &\tt{isGt}~\tt{Lt} \re \tt{false} \\
+  &\tt{isGt}~\tt{Gt} \re \tt{true} \\
+\end{aligned}
+\end{array}
+\]
 
 \begin{align*}
-&\mathbb{Z}: \type & &\mathbb{P}: \type \\
-&|~\tt{Z0}: \mathbb{Z} & &|~\tt{H} : \mathbb{P} \\
-&|~\tt{ZPos}: \mathbb{P} \ra \mathbb{Z} & &|~\tt{O}: \mathbb{P} \ra \mathbb{P} \\
-&|~\tt{ZNeg}: \mathbb{P} \ra \mathbb{Z} & &|~\tt{I}: \mathbb{P} \ra \mathbb{P} \\
-&\tt{int}: \set & &\tt{pos}: \set \\
-&\el~\tt{int} \re \mathbb{Z} & &\el~\tt{pos} \re \mathbb{P} \\
+&\leq: \bb{Z} \ra \bb{Z} \ra \prop  \coloneq \lambda x,\lambda y, \neg (\tt{istrue}(\tt{isGt}(x \doteq y))) & &\tt{istrue} : \bb{B} \ra \prop \\
+&<: \bb{Z} \ra \bb{Z} \ra \prop  \coloneq \lambda x,\lambda y, \neg (\tt{istrue}(\tt{isLt}(x \doteq y))) & &\tt{istrue}~\tt{true} \re \top \\
+&\geq: \bb{Z} \ra \bb{Z} \ra \prop  \coloneq \lambda x,\lambda y, \neg (x < y) & &\tt{istrue}~\tt{false} \re \bot \\
+&>: \bb{Z} \ra \bb{Z} \ra \prop  \coloneq \lambda x,\lambda y, \neg (x \leq y) & & \\
 \end{align*}
+
+The arithmetic operator such as \tt{add}, \tt{sub}, etc. in \cref{fig:arith-ops} are constant defined by rewriting rules.
+
+  
+
+% \subsection{A Prelude Encoding for Alethe}
+% \label{sect:embedding}
+
+% \begin{definition}[Prelude Encoding]
+% \label{def:defuniv}
+% The signature $\Sigma$ of our encoding contains the following definitions and rewrite rules provided by the standard library of Lambdapi that we use to encode Alethe proofs:
+% \begin{align*}
+% &\set: \type & &\prop: \type \\
+% &\el: \set \rightarrow \type  & &\prf : \prop \rightarrow \type \\
+% &\mathop{\leadsto}: \set \rightarrow \set \rightarrow \set & &o: \set \\
+% &\el\,(x \leadsto y) \hookrightarrow \el\,x \rightarrow \el\,y & &\el\,o  \hookrightarrow \prop \\
+% \end{align*}
+% \end{definition}
+
+%  The constants \set{} and \prop{} (lines 1 and 6) are type universes ``à la Tarski'' \cite[\S Universes]{intuitype} in $\lpm$.
+%  The type \set{} represents the universe of \textit{small types}, i.e.\ a subclass of types for which we can define equality.
+%  SMT sorts are represented in $\lpm$ as elements of type \set{}. Since elements of type \set{} are not types themselves, we also introduce a decoding function $\el: \set \rightarrow \type$ that interprets SMT sorts as $\lpm$ types.
+%  Thus, we represent the terms of sort \texttt{Bool} of SMT by elements of type $\el{}\,o$. The constructor $\leadsto$ is used to encode SMT functions and predicates.
+% The type \prop{} represents the universe of propositions in $\lpm$. Like \set{}, elements of type \prop{} are not types themselves but are mapped to types by the decoding function $\prf{}: \prop \rightarrow \type$. By analogy with the Curry-de-Brujin-Howard isomorphism, it embeds propositions into types, mapping each proposition $A$ to the type $\prf{}~A$ of its proofs.
+
+% \begin{figure}
+% \begin{align*}
+% &\tt{Clause}: \type & &\cal{F}: \tt{Clause} \ra \prop \\
+% &\nil: \tt{Clause} & & \cal{F}~\nil \re \bot \\
+% &\veedot: \prop \ra \tt{Clause}  \ra \tt{Clause} & & \cal{F}~x \veedot y \re x \lor^c (\cal{F}~y) \\
+% &\pid (c : \tt{Clause}) \coloneqq \pic (\cal{F}~c) & &  \\
+% \end{align*}
+% \caption{The \tt{Clause} type and operations on clauses.}
+% \end{figure}
+
+% Alethe distinguishes between clauses that appear in steps, \colorbox{green!30}{(cl\,$l_1 \dots l_n$)} in \cref{eq:step}, and ordinary disjunction \cite[\S 4]{alethespec}.
+% The syntax for clauses uses the \textcolor{purple}{\tt{cl}} operator, while disjunction is represented as the standard SMT-LIB \textcolor{purple}{\texttt{or}}.
+% We define the type $\kw{Clause}$ that encodes an Alethe clause as a list of propositions. The constructor $\veedot$ prepends an element to a list, and $\nil$ is the empty list.
+% Logically, clauses are interpreted as disjunctions via the function $\cal{F}$ defined by rewriting rules. For convenience, we also introduce the predicate $\pid$ asserting that a clause is provable.
+
+% \subsection{Classical connectives, quantifiers and facts}
+
+% Since SMT solvers are based on classical logic, we use the constructive connectives and quantifiers from the Lambdapi standard library and define the classical ones from them using the double-negation translation \cite{dowek:classical} as a definition.
+% %
+% \begin{align*}
+% & \mathop{\pic} p \coloneqq \mathop{\prf{}} (\neg \neg p) \\
+% & \mathop{=}:  \Pi {[a: \set]}, \el\, a \rightarrow \el\,a \rightarrow \prop \\
+% & p \lor^c q \coloneqq  \neg \neg p \lor \neg \neg q \\
+% & \forall^c \coloneqq \Pi {[a: \set]},  \Pi p: (\el\, a \ra \prop),  \forall \, x. \neg \neg  p\,x \\
+% &\texttt{classic}:\  \Pi [p: \prop], \pic (p \lor^c \neg p) \\
+% &\texttt{prop\_ext}:\  \Pi [p\,q: \prop], \pic (p \Leftrightarrow^c q ) \rightarrow \pic (p = q) \\
+% \end{align*}
+
+% Therefore, a step in an Alethe proof trace is represented as a proposition $\pic~p$, defined as the intuitionistic proof \prf{} of the doubly negated predicate.
+% Equality over small types is parameterized over types
+% $\el\,a$ for the type parameter $[a : \set{}]$ (the square brackets indicate that this parameter need not be given explicitly).
+% We also define classical connectives, quantifiers, and the choice operator $\epsilon$ (\cite[\S 2.1]{alethespec}) as illustrated above.
+% We prove the law of excluded middle and add the proposition of Boolean extensionality stating that classical equivalence coincides with equality over Booleans.
+% SMT logic enjoys the property of propositional completeness (also referred to as propositional degeneracy) asserting that $\forall^c A,~(A = \top) \lor^c (A = \bot)$. Moreover, propositionally equivalent formulas are equal. We thus obtain the theorems
+% \tt{classic} and \tt{prop\_ext}.
+% \begin{align*}
+% \end{align*}
+
 
 \subsection{Functions used in the translation}
 

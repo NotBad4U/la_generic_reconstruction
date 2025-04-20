@@ -178,7 +178,7 @@ we write $s1 \bowtie s2$ for \cref{eqn:inequality}.
     \end{center}
 
     \item If all variables of $\varphi$ are Int and coefficient $a_1 \dots a_n \in \mathbb{Q}$,
-    then $a \coloneq a \times lcd(a_1 \dots a_n)$ where $lcd$ is the least common denominator of $[a_1 \dots a_n]$.
+    then $a \coloneq a \times \mathit{lcd}(a_1 \dots a_n)$ where $\mathit{lcd}$ is the least common denominator of $[a_1 \dots a_n]$.
     
     \item If $\bowtie$ is $=$, then replace $\varphi$ by
     $\sum_{i=0}^{m}a\times{}c_i\times{}t_i = a\times{}d$, otherwise replace it by
@@ -244,3 +244,4 @@ Carcara will check this subproof and then replace step $S$ in the original proof
 (step S (cl (not l1) ... (not ln)) :rule resolution :premises (S.t_m+1 S.t_m+2))
 \end{lstlisting}
 
+In the next section, we first present an overview of our embedding of Alethe in Lambdapi, and then our automatic procedure to reconstruct $\tt{la\_generic}$ step that appear in LIA problem.

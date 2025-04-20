@@ -36,3 +36,63 @@
       \caption{Alethe grammar}
       \label{fig:grammar}
 \end{figure}
+
+%  Lambdapi Definitions for Integer and Binary Arithmetic
+\section{Lambdapi Formalizations for Integer and Binary Number Operations}
+\label{app:lambdapi-func-def}
+
+\noindent
+\begin{minipage}[t]{0.48\textwidth}
+% \textbf{\ttfamily add : \bb{P} \ra \bb{P} \ra \bb{P}}
+
+\begin{align*}
+&\tt{add} : \bb{P} \ra \bb{P} \ra \bb{P} \\
+& \tt{add}~(\tt{I}~x)~(\tt{I}~q) \re \tt{O}~(\tt{add\_c}~x~q) \\
+& \tt{add}~(\tt{I}~x)~(\tt{O}~q) \re \tt{I}~(\tt{add}~x~q) \\
+& \tt{add}~(\tt{O}~x)~(\tt{I}~q) \re \tt{I}~(\tt{add}~x~q) \\
+& \tt{add}~(\tt{O}~x)~(\tt{O}~q) \re \tt{O}~(\tt{add}~x~q) \\
+& \tt{add}~x~\tt{H} \re \tt{succ}~x \\
+& \tt{add}~\tt{H}~y \re \tt{succ}~y \\
+\end{align*}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\begin{align*}
+&\tt{add\_c} : \bb{P} \ra \bb{P} \ra \bb{P} \\
+& \tt{add\_c}~(\tt{I}~x)~(\tt{I}~q) \re \tt{I}~(\tt{add\_c}~x~q) \\
+& \tt{add\_c}~(\tt{I}~x)~(\tt{O}~q) \re \tt{O}~(\tt{add\_c}~x~q) \\
+& \tt{add\_c}~(\tt{O}~x)~(\tt{I}~q) \re \tt{O}~(\tt{add\_c}~x~q) \\
+& \tt{add\_c}~(\tt{O}~x)~(\tt{O}~q) \re \tt{I}~(\tt{add}~x~q) \\
+& \tt{add\_c}~x~\tt{H} \re \tt{add}~x~(\tt{O}~\tt{H}) \\
+& \tt{add\_c}~\tt{H}~y \re \tt{add}~(\tt{O}~\tt{H})~y \\
+\end{align*}
+\end{minipage}
+
+\begin{align*}
+&\tt{sub} : \bb{P} \ra \bb{P} \ra \bb{Z} \\
+& \tt{sub}~(\tt{I}~p)~(\tt{I}~q) \re \tt{double}~(\tt{sub}~p~q) \\
+& \tt{sub}~(\tt{I}~p)~(\tt{O}~q) \re \tt{succ\_double}~(\tt{sub}~p~q) \\
+& \tt{sub}~(\tt{I}~p)~\tt{H} \re \tt{Zpos}~(\tt{O}~p) \\
+& \tt{sub}~(\tt{O}~p)~(\tt{I}~q) \re \tt{pred\_double}~(\tt{sub}~p~q) \\
+& \tt{sub}~(\tt{O}~p)~(\tt{O}~q) \re \tt{double}~(\tt{sub}~p~q) \\
+& \tt{sub}~(\tt{O}~p)~\tt{H} \re \tt{Zpos}~(\tt{pos\_pred\_double}~p) \\
+& \tt{sub}~\tt{H}~(\tt{I}~q) \re \tt{Zneg}~(\tt{O}~q) \\
+& \tt{sub}~\tt{H}~(\tt{O}~q) \re \tt{Zneg}~(\tt{pos\_pred\_double}~q) \\
+& \tt{sub}~\tt{H}~\tt{H} \re \tt{Z0} \\
+\end{align*}
+
+\begin{align*}
+&\tt{compare\_acc} : \bb{P} \ra \tt{Comp} \ra \bb{P} \ra \tt{Comp} \\
+& \tt{compare\_acc}~(\tt{I}~x)~c~(\tt{I}~q) \re \tt{compare\_acc}~x~c~q \\
+& \tt{compare\_acc}~(\tt{I}~x)~\_~(\tt{O}~q) \re \tt{compare\_acc}~x~\tt{Gt}~q \\
+& \tt{compare\_acc}~(\tt{I}~\_)~\_~\tt{H} \re \tt{Gt} \\
+& \tt{compare\_acc}~(\tt{O}~x)~\_~(\tt{I}~q) \re \tt{compare\_acc}~x~\tt{Lt}~q \\
+& \tt{compare\_acc}~(\tt{O}~x)~c~(\tt{O}~q) \re \tt{compare\_acc}~x~c~q \\
+& \tt{compare\_acc}~(\tt{O}~\_)~\_~\tt{H} \re \tt{Gt} \\
+& \tt{compare\_acc}~\tt{H}~\_~(\tt{I}~\_) \re \tt{Lt} \\
+& \tt{compare\_acc}~\tt{H}~\_~(\tt{O}~\_) \re \tt{Lt} \\
+& \tt{compare\_acc}~\tt{H}~c~\tt{H} \re c \\
+\\
+&\tt{compare}~x~y \coloneq \tt{compare\_acc}~x~\tt{Eq}~y \\
+\end{align*}
+  
