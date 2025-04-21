@@ -1,5 +1,5 @@
 
-% % ===== Unicode Alethe encoding in Lambdapi =========
+% ===== Unicode Alethe encoding in Lambdapi =========
 \DeclareUnicodeCharacter{03C0}{\texttt{Prf}}
 \DeclareUnicodeCharacter{27F9}{$\Rightarrow$}
 \DeclareUnicodeCharacter{2254}{$\coloneqq$}
@@ -30,7 +30,7 @@
 \DeclareUnicodeCharacter{25A1}{$\square$}
 \DeclareUnicodeCharacter{2082}{$_2$}
 
-% % ===== Grammar Alethe =========
+% ===== Grammar Alethe =========
 
 \definecolor{SmtBlue}{HTML}{00007f}
 \definecolor{SmtGreen}{HTML}{3b7f31}
@@ -43,7 +43,7 @@
 \newcommand{\grOr}{|}
 \newcommand{\concat}{~+\!\!\!+~}
 
-% % ===== Command for expression in the paper =========
+% ===== Command for expression in the paper =========
 
 \newcommand\textAlethe[1]{\texttt{#1}}
 \newcommand\C[1]{\mathcal{C}(#1)}
@@ -55,10 +55,9 @@
 \newcommand\pid{\textcolor{purple}{\texttt{\upshape{Prf}}^\bullet}}
 \newcommand\pic{\textcolor{purple}{\texttt{\upshape{Prf}}^c}}
 
-% % ===================== Alias =====================
+% ========== Alias ==========
 \let\cal\mathcal
 \let\bb\mathbb
-\let\cons\veedot
 \let\nil\blacksquare
 \let\eps\epsilon
 \let\ra\rightarrow
@@ -75,7 +74,7 @@
 \newcommand\eq[0]{\kw{eq}}
 
 
-% Reification commands
+% ==========  Reification commands ==========
 \newcommand\cst[1]{\ensuremath{(\kw{cst}~#1)}}
 \newcommand\opp[1]{\ensuremath{\kw{opp}~#1}}
 \newcommand\mul[2]{\ensuremath{\kw{mul}~#1~#2}}
@@ -100,7 +99,7 @@
 \newcommand\type{\textcolor{orange}{\texttt{\upshape{TYPE}}}}
 \newcommand\kind{\textcolor{YellowOrange}{\texttt{KIND}}}
 
-%%%%%%%%% veedot symbol for Clause %%%%%%%%%%%%
+% ========== veedot symbol for Clause ==========
 
 \makeatletter
 \newcommand{\genericdot@}[2]{% #1=raising factor, #2=symbol
@@ -125,6 +124,10 @@
 \newcommand{\veedot}{\genericdot@{0.3}{\vee}}
 \newcommand{\bigveedot}{\genericdotop@{0.25}{\bigvee}}
 \makeatletter
+
+\let\cons\veedot
+
+% ========== Comments ==========
 
 \todostyle{sm}{color=red}
 \todostyle{ac}{color=green}
