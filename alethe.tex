@@ -182,17 +182,18 @@ we write $s1 \bowtie s2$ for \cref{eqn:inequality}.
     
     \item If $\bowtie$ is $=$, then replace $\varphi$ by
     $\sum_{i=0}^{m}a\times{}c_i\times{}t_i = a\times{}d$, otherwise replace it by
-    $\sum_{i=0}^{m}|a|\times{}c_i\times{}t_i = |a|\times{}d$. 
-\end{enumerate}
+    $\sum_{i=0}^{m}|a|\times{}c_i\times{}t_i = |a|\times{}d$.
 
-Finally, the sum of the resulting literals is trivially contradictory.
-The sum
-\[
-    \sum_{k=1}^{o}\sum_{i=1}^{m^o}c_i^k*t_i^k \bowtie \sum_{k=1}^{o}d^k
-\]
-where $c_i^k$ and $t_i^k$ are the constant and term from the literal $varphi_k$, and $d^k$ is the constant $d$ of $varphi_k$.
-The operator $\bowtie$ is $=$ if all operators are $=$, $>$ if all are either $=$ or $>$, and $\geq$ otherwise. The $a_i$ must be such
-that the sum on the left-hand side is $0$ and the right-hand side is $>0$ (or $\geq 0$ if $\bowtie$ is $>$).
+    \item Finally, the sum of the resulting literals is trivially contradictory.
+    The sum
+    \[
+        \sum_{k=1}^{o}\sum_{i=1}^{m^o}c_i^k*t_i^k \bowtie \sum_{k=1}^{o}d^k
+    \]
+  where $c_i^k$ and $t_i^k$ are the constant and term from the literal $varphi_k$, and $d^k$ is the constant $d$ of $varphi_k$.
+  The operator $\bowtie$ is $=$ if all operators are $=$, $>$ if all are either $=$ or $>$, and $\geq$ otherwise. The $a_i$ must be such
+  that the sum on the left-hand side is $0$ and the right-hand side is $>0$ (or $\geq 0$ if $\bowtie$ is $>$).
+
+\end{enumerate}
 
 The step 3 has been added by our own, as the subsequent steps in the original algorithm are designed for $>$ and $\geq$ and do not clearly address how to handle $<$ and $\leq$.
 Additionally, step 6  was added to ensure that our construction is independent of $\mathbb{Q}$.

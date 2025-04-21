@@ -1,4 +1,14 @@
-\section{Reconstruction of linear integer arithmetic}
+\section{Reconstruction of linear arithmetic for LIA logic}
+
+We will now describe an alternative technique based on computational reflection that allows us to prove the permutation of clauses efficiently.
+Proof by computational reflection is a technique introduced in \cite{reflected_origin} that benefits from the internal reduction system of the proof assistant in order to reduce the size of the proof term computed and consequently speed up its checking. In Lambdapi, we can take advantage of the fact that rewriting rules are part of the internal reduction system ($\equiv_{\beta\cal{R}}$), which makes proof by reflection convenient to set up and implement.
+Relying on the rewriting facilities of Lambdapi, we implemented a decision procedure that checks equality between clauses by rewriting modulo AC-canonization.
+
+The core idea is to put clauses with pivots in different positions into a canonical form, allowing them to be compared.
+If two clauses are determined to be equal, the current clause can be substituted with one where the pivot is placed at the head position, allowing for the subsequent application of \cref{lemma:resolution}.
+To handle associative and commutative symbols, Lambdapi provides the modifiers \texttt{associative} and \texttt{commutative},
+ensuring that terms are systematically placed into a canonical form given a builtin ordering relation, following the technique described in \cite{ACorigin} and \cite[\S 5]{univAC}.
+
 
 
 % https://q.uiver.app/#q=WzAsOCxbMSwyLCJcXG1hdGhiYntafSJdLFsxLDAsIlxcbWF0aGNhbHtSfSJdLFszLDAsIlxcbWF0aGNhbHtSfSJdLFszLDIsIlxcbWF0aGJie1p9Il0sWzAsMiwidF8xID1fXFxtYXRoYmJ7Wn0gdF8yIl0sWzQsMiwiZGVub3RlKHRfMSkgPV9cXG1hdGhiYntafSBkZW5vdGUodF8yKSJdLFswLDAsInJlaWZ5KHRfMSkgPV9cXG1hdGhjYWx7Un0gcmVpZnkodF8yKSJdLFs0LDAsIm5vcm0odF8xKSA9X1xcbWF0aGNhbHtSfSBub3JtKHRfMikiXSxbMCwxLCJyZWlmeSJdLFsxLDIsIlxccmlnaHRhcnJvd197QUN9IiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZG90dGVkIn19fV0sWzIsMywiZGVub3RlIl0sWzAsMywiXFxlcXVpdiIsMSx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6ImRvdHRlZCJ9LCJoZWFkIjp7Im5hbWUiOiJub25lIn19fV1d

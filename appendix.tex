@@ -99,6 +99,8 @@
 \subsection{Confluence of the rewriting rules of integers and positive binary number}
 \label{app:confluence-int-pos}
 
+The rules presented below represent the relations $\ra_\bb{Z}$ and $\ra_\bb{P}$ encoded in the TRS\footnote{\url{http://www.lri.fr/~marche/tpdb/format.html}} format accepted by the \cite{CSI} tool.
+These rules can be used to rerun the tool in order to verify the confluence property.
 
 \begin{lstlisting}[language=trs, caption=Rewriting rule of $\bb{Z}$ and $\bb{P}$ in the TRS format]
 (VAR
@@ -214,7 +216,7 @@
 \begin{proof}
 CSI automatically proves the confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$ by giving the polynomial interpretation:
 \begin{align*}
-[\tt{succ}(x)] = 4*x & &[\tt{add}(x, y)] = 4 * x + 4 * y + 2  & &[{\tt{H}}] = 4 \\
+[\tt{succ}(x)] = 4*x & &[\tt{add}(x, y)] = 4 * x + 4 * y + 2  & &[ {\tt{H}} ] = 4 \\
 \end{align*}
 \end{proof} 
 \end{lemma}
