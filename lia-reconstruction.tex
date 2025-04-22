@@ -1,68 +1,81 @@
 \section{Reconstruction of linear arithmetic for LIA logic}
+\label{sec:lia-reconstruction}
 
-We will now describe an alternative technique based on computational reflection that allows us to prove the permutation of clauses efficiently.
-Proof by computational reflection is a technique introduced in \cite{reflected_origin} that benefits from the internal reduction system of the proof assistant in order to reduce the size of the proof term computed and consequently speed up its checking. In Lambdapi, we can take advantage of the fact that rewriting rules are part of the internal reduction system ($\equiv_{\beta\cal{R}}$), which makes proof by reflection convenient to set up and implement.
-Relying on the rewriting facilities of Lambdapi, we implemented a decision procedure that checks equality between clauses by rewriting modulo AC-canonization.
+Proof by reflection is a technique used to write certified automation procedure by reducing the validity of a logical statement to a symbolic computation.
+It relies on the following definitions: let $P: Z \ra \prop$ be a predicate over a data type Z and we have a function $f: Z \ra \tt{bool}$ such that the following theorem holds:
 
-The core idea is to put clauses with pivots in different positions into a canonical form, allowing them to be compared.
-If two clauses are determined to be equal, the current clause can be substituted with one where the pivot is placed at the head position, allowing for the subsequent application of \cref{lemma:resolution}.
-To handle associative and commutative symbols, Lambdapi provides the modifiers \texttt{associative} and \texttt{commutative},
+\begin{equation*}
+\tt{f\_correct} : \forall z: Z, (f~z = \tt{true}) \ra (P~z)
+\end{equation*}
+
+If $f$ is defined so that it reduces to $f z$ to \tt{true} for a broad class of expressions $z$, then the following
+proof term  $\tt{f\_correct}~z~(\tt{relf}~\tt{true})$ constitutes a proof of predicate $(P~z)$. In step 8 of the $\tt{la\_generic}$,
+the primary challenge lies in reasoning modulo associativity and commutativity when manipulating expressions over $\bb{Z}$.
+Since arithmetic operators and inequality relations are defined by rewrite rules by rewrites rules as shown \cref{fig:arith-ops},
+the key idea is to provide a normalization function that transforms a $\bb{Z}$ expression into a canonical form,
+such that it can be reduce to a constant as variable terms of a linear polynomial cancel each other \todo[ac]{Add an example of the reduction step by step in Sec 1.}{e.g. $x$ and $y$} in \cref{lst:smtexampleproof}.
+
+To handle associative and commutative, Lambdapi provides the modifiers \lstinline[language=Lambdapi]{associative commutative symbol},
 ensuring that terms are systematically placed into a canonical form given a builtin ordering relation, following the technique described in \cite{ACorigin} and \cite[\S 5]{univAC}.
+To avoid polluting the $\bb{Z}$ type and its associated rewrites rules, we introduce a separate type dedicated to representing linear polynomials. 
+By applying the \lstinline[language=Lambdapi]{associative commutative} modifiers within this specialized type, we ensure canonicalization of expressions while preserving the original structure and semantics of $\bb{Z}$.
+
+\subsection{Representation}
+\label{ssec:representation}
+
+The procedure is based on a group structure, denoted as  $\bb{G}$ defined in \cref{fig:grp} which represents linear polynomials.
+The base type for the elements of this group is specified as $\bb{G}: \type$. The unary operator $\tt{cst}$ denotes a constant from $\bb{Z}$.
+A $\tt{var}$ constructoris a "catch-all" case for subexpressions that we cannot model. These subexpressions will correspond to actual variables in $\bb{Z}$.
+The constructor $\tt{mul}$  represents the multiplication of an element of $\bb{G}$ by a constant. The constructor $\tt{opp}$ corresponds to the inverse operator within the group.
+Lastly, the constructor $\tt{add}$ represent the addition between two elements of \cref{fig:grp} and it is characterized by the modifiers \lstinline[language=Lambdapi]{associative commutative}.
 
 
+\begin{figure}
+\begin{align*}
+& \bb{G}: \type & & \reify{} : \bb{Z} \ra \bb{G} & & \den{}: \bb{G} \ra \bb{Z} \\
+&|~\tt{add}: \bb{G} \ra \bb{G} \ra \bb{G} & & \reify{Z0} \re \cst{Z0} & & \den{\cst{c}} \re c \\
+&|~\tt{var}: \bb{Z} \ra \bb{Z} \ra \bb{G} & & \reify{(x + y)} \re \add{(\reify{x}})({\reify{y})} & & \den{\opp{x}} \re  \sim (\den{x}) \\
+&|~\tt{mul}: \bb{Z} \ra \bb{R} \ra \bb{G} & & \reify{(\sim x)} \re \opp{\reify{x}} & & \den{\mul{c}{x}} \re  c \times (\den{x}) \\
+&|~\tt{opp}: \bb{R} \ra \bb{G} & & \reify{x} \re \var{x}{1} & & \den{\add{x}{y}} \re (\den{x}) + (\den{y}) \\
+&|~\tt{cst}: \bb{Z} \ra \bb{G} & & & & \den{\var{c}{x}} \re  c \times x \\
+&\tt{grp}: \set & &  & & \\
+&\el~\tt{grp} \re \bb{G} & & & &
+\end{align*}
+\caption{Definition of $\bb{G}$  Algebra and its reification and denotation functions}
+\label{fig:grp}
+\end{figure}
+
+\begin{align*}
+&\add{\var{x}{c_1}}{\var{x}{c2}} \re \kw{var}~x~(c_1 + c_2) \\
+&\add{\var{x}{c_1}}{(\add{\var{x}{c_2}}{y})} \re \add{\var{x}{c_1 + c_2}}{y} \\
+&\add{\cst{c_1}}{\cst{c_2}} \re \cst{c_1 + c_2} \\
+&\add{\cst{c_1}}{(\add{\cst{c_2}}{y})} \re \add{\cst{c_1 + c_2}}{y} \\
+&\add{\cst{0}}{x} \re x \\
+&\add{x}{\cst{0}} \re x \\
+&\opp{\var{x}{c}} \re \var{x}{(-c)} \\
+&\opp{\cst{c}} \re \cst{(-c)} \\
+&\opp{\opp{x}} \re x \\
+&\opp{\add{x}{y}} \re \add{(\opp{x})}{(\opp{y})} \\
+&\mul{k}{\var{x}{c}} \re \var{x}{(k \times c)} \\
+&\mul{k}{\opp{x}} \re \mul{(-k)}{x} \\
+&\mul{k}{(\add{x}{y})} \re \add{(\mul{k}{x})}{(\mul{k}{y})} \\
+&\mul{k}{\cst{c}} \re \cst{k \times c} \\
+&\mul{c_1}{(\mul{c_2}{x})} \re \mul{(c_1 \times c_2)}{x} \\
+\end{align*}
+
+\subsection{Normalization}
+\label{ssec:normalization}
 
 % https://q.uiver.app/#q=WzAsOCxbMSwyLCJcXG1hdGhiYntafSJdLFsxLDAsIlxcbWF0aGNhbHtSfSJdLFszLDAsIlxcbWF0aGNhbHtSfSJdLFszLDIsIlxcbWF0aGJie1p9Il0sWzAsMiwidF8xID1fXFxtYXRoYmJ7Wn0gdF8yIl0sWzQsMiwiZGVub3RlKHRfMSkgPV9cXG1hdGhiYntafSBkZW5vdGUodF8yKSJdLFswLDAsInJlaWZ5KHRfMSkgPV9cXG1hdGhjYWx7Un0gcmVpZnkodF8yKSJdLFs0LDAsIm5vcm0odF8xKSA9X1xcbWF0aGNhbHtSfSBub3JtKHRfMikiXSxbMCwxLCJyZWlmeSJdLFsxLDIsIlxccmlnaHRhcnJvd197QUN9IiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZG90dGVkIn19fV0sWzIsMywiZGVub3RlIl0sWzAsMywiXFxlcXVpdiIsMSx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6ImRvdHRlZCJ9LCJoZWFkIjp7Im5hbWUiOiJub25lIn19fV1d
 \begin{tikzcd}[ampersand replacement=\&,column sep=small]
-	{reify(t_1) =_\mathcal{R} reify(t_2)} \& {\mathcal{R}} \&\& {\mathcal{R}} \& {{t_1\downarrow_{AC}} =_\mathcal{R} t_2\downarrow_{AC}} \\
+	{\reify{(t_1)} =_\bb{Z} \reify{(t_2)}} \& {\mathcal{R}} \&\& {\mathcal{R}} \& {{t_1\downarrow_{AC}} =_\bb{Z} t_2\downarrow_{AC}} \\
 	\\
-	{t_1 =_\mathbb{Z} t_2} \& {\mathbb{Z}} \&\& {\mathbb{Z}} \& {denote({t_1\downarrow_{AC}}) =_\mathbb{Z} denote({t_2\downarrow_{AC}})}
+	{t_1 =_\mathbb{Z} t_2} \& {\mathbb{Z}} \&\& {\mathbb{Z}} \& {\den{({t_1\downarrow_{AC}})} =_\mathbb{Z} \den{({t_2\downarrow_{AC}})}}
 	\arrow["{\rightarrow_{AC}}", dotted, from=1-2, to=1-4]
 	\arrow["denote", from=1-4, to=3-4]
 	\arrow["reify", from=3-2, to=1-2]
 	\arrow["\iff"{description}, dotted, no head, from=3-2, to=3-4]
 \end{tikzcd}
-
-
-\begin{definition}[$\mathcal{R}$]
-\begin{align*}
-\add{\var{x}{c_1}}{\var{x}{c2}} &\re \kw{var}~x~(c_1 + c_2) \\
-\add{\var{x}{c_1}}{(\add{\var{x}{c_2}}{y})} &\re \add{\var{x}{c_1 + c_2}}{y} \\
-\add{\cst{c_1}}{\cst{c_2}} &\re \cst{c_1 + c_2} \\
-\add{\cst{c_1}}{(\add{\cst{c_2}}{y})} &\re \add{\cst{c_1 + c_2}}{y} \\
-\add{\cst{0}}{x} &\re x \\
-\add{x}{\cst{0}} &\re x \\s
-\opp{\var{x}{c}} &\re \var{x}{(-c)} \\
-\opp{\cst{c}} &\re \cst{(-c)} \\
-\opp{\opp{x}} &\re x \\
-\opp{\add{x}{y}} &\re \add{(\opp{x})}{(\opp{y})} \\
-\mul{k}{\var{x}{c}} &\re \var{x}{(k \times c)} \\
-\mul{k}{\opp{x}} &\re \mul{(-k)}{x} \\
-\mul{k}{(\add{x}{y})} &\re \add{(\mul{k}{x})}{(\mul{k}{y})} \\
-\mul{k}{\cst{c}} &\re \cst{k \times c} \\
-\mul{c_1}{(\mul{c_2}{x})} &\re \mul{(c_1 \times c_2)}{x} \\
-\end{align*}
-\end{definition}
-
-
-\begin{definition}[reify]
-\begin{align*}
-\reify{0} &\re \cst{0} \\
-\reify{(-x)} &\re \opp{\reify{x}} \\
-\reify{(x + y)} &\re \add{\reify{x}}{\reify{y}} \\
-\reify{x} &\re \var{x}{1} \\
-\end{align*}
-\end{definition}
-
-\begin{definition}[denote]
-\begin{align*}
-\den{\var{c}{x}} &\re  c \times x \\
-\den{\cst{c}} &\re c \\
-\den{\opp{x}} &\re  - (\den{x}) \\
-\den{\mul{c}{x}} &\re  c \times \den{x} \\
-\den{\add{x}{y}} &\re \den{x} + \den{y}\\
-\end{align*}
-\end{definition}
-
 
 \begin{definition}
     Let $\mathit{aliens}_{\sqcup}: \mathcal{C} \rightarrow \mathcal{C}^+$ be the function mapping every term in $\mathcal{C}$ to a non-empty list of terms such that $\mathit{aliens}_{\sqcup}(t) = \mathit{aliens}_{\sqcup}(u) \circ \mathit{aliens}_{\sqcup}(v)$ if $t = u \sqcup v$, and $\mathit{aliens}_{\sqcup}(t) = [t]$ otherwise.
@@ -100,4 +113,5 @@ Let $\RAC = \RRAC \R$, where $\mathcal{R}$ is defined by the rewrite rules of ??
   
 An $\RAC$ step is an AC-canonization followed by a standard $\lra_{\mathcal{R}}$ step with syntactic matching.
   
-  
+\subsection{Generation of the proof term for \tt{la\_generic} in \tt{LIA}}
+\label{ssec:gen-lia-proof}
