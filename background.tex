@@ -38,10 +38,11 @@ The typing rules of $\lpm$ are the one of  $\lambda\Pi$ \cite[\S 2]{lf}, except 
 \end{figure}
 
 In our encoding presented \cite{ColtellacciMD24} we employ Tarski-style universe \cite[\S Universes]{intuitype} where types are represented by elements of a base type and interpreted via the decoding function.
-We defined the constant $\prop: \type$ for the type of proposition and the decoding function $\pic: \prop \ra \type$ maps each proposition to $\type$.
-Lambdapi does not support quantiﬁy over a variable of type $\type$. More precisely, it is not possible to assign the type $\Pi X : \type,(X \ra \prop) \ra \prop$ to the universal quantifier $\forall$.
-To address this, we have the constant $\set : \type$ for the types of object-terms, and a decoding function ${\el}: \set \ra \type$ to embed the terms of type $\set$ into terms of type $\type$ giving us the quantifier $\forall: \Pi x: \set, (\el~x \ra \prop) \ra \prop$.
-We have the constant $o: \set$ with the rewrite rule $\el\, o \re \prop$ to quantify over propositions.
+We defined the constant $\prop: \type$ for the type of proposition and the decoding function $\pic: \prop \ra \type$ that maps each proposition to $\type$.
+Since Lambdapi does not support quantiﬁy over a variable of type $\type$. More precisely, it is not possible to assign the type $\Pi X : \type,(X \ra \prop) \ra \prop$ to the universal quantifier $\forall$.
+To circumvent this, we have the constant $\set : \type$ for the types of object-terms, and a decoding function ${\el}: \set \ra \type$ that embeds $\set$ into $\type$.
+This permits us to define the quantifier as $\forall: \Pi x: \set, (\el~x \ra \prop) \ra \prop$.
+To quantify over propositions, we further define a constant $o: \set$ and add the rewrite rule  $\el\, o \re \prop$.
 
 \subsection{Alethe proof}
 \label{ssect:alethe}
@@ -120,13 +121,12 @@ a directed acyclic graph. A rule might also depend on a list of arguments \color
     lia\_generic & Tautologous disjunction of linear integer inequalities. \\
     la\_disequality & $t_1 \approx t_2 \lor \neg (t_1 \geq t_2) \lor \neg (t_2 \geq t_1)$ \\
     la\_totality & $t_1 \geq t_2 \lor t_2 \geq t_1$ \\
-    la\_tautology & A trivial linear tautology \\
     la\_mult\_pos & $t_1 > 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie t_1 * t_3$ and $\bowtie \in \{<, >, \geq, \leq, =\}$ \\
     la\_mult\_neg & $t_1 < 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie_{inv} t_1 * t_3$ \\
     la\_rw\_eq & $(t \approx u) \approx (t \geq u \land u \geq t)$ \\
     comp\_simplify & Simplification of arithmetic comparisons. \\
     \end{tabular}
-    \caption{Linear arithmetic rules in Alethe.}
+    \caption{Linear arithmetic rules in Alethe supported.}
     \label{table:linear-arith-rules}
 \end{table}
 
