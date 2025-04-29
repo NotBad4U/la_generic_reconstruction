@@ -7,8 +7,8 @@ and therefore reimplementing the work done by the solver.
 Carcara considers $\tt{lia\_generic}$ steps as holes in the proof,  as "their checking is as hard as solving" \cite[\S 3.2]{carcara}.
 However, Carcara relies on an external tool that generates Alethe proofs to formulate the steps by solving corresponding problems in a proof-producing manner.
 The proof is then imported, and validated before replacing the original step. However, at present, Carcara only use cvc5 for performing this task.
-In detail, the elaboration method, when encountering a $\tt{lia\_generic}$ step S concluding the negated inequalities $ \neg l_1 \lor \dots \neg l_n$ , generates an SMT-LIB problem asserting $l_1 \land \dots \land l_n$ and invokes \emph{cvc5} on it, expecting an Alethe proof $\pi : (l_1 \land \dots \land l_n) \ra \bot$.
-Carcara will check this subproof and then replace step $S$ in the original proof by a proof of the form:
+In detail, the elaboration method, when encountering a $\tt{lia\_generic}$ step S concluding the negated inequalities $ \neg l_1 \lor \dots \neg l_n$ , generates an SMT-LIB problem asserting $l_1 \land \dots \land l_n$ and invokes \emph{cvc5} on it, expecting an Alethe proof $\pi : (l_1 \land \dots \land l_n) \ra \bot$
+that do not use $\tt{lia\_generic}$. Carcara will check this subproof and then replace step $S$ in the original proof by a proof of the form:
 
 \begin{lstlisting}[language=SMT]
 (step S (cl (not l1) ... (not ln)) :rule lia_generic)
