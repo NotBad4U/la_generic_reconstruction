@@ -83,10 +83,11 @@ We will use the input problem shown in the top part of \cref{lst:smtexampleinput
 \subsubsection{Alethe Trace Format Overview}
 \label{sssect:alethe-trace-overview}
 
-An Alethe proof trace inherits the declarations of its input problem. All symbols (sorts, functions, assertions, etc.) declared or defined in the input problem remain declared or defined, respectively. Furthermore, the syntax for terms, sorts, and annotations uses the syntactic rules defined in SMT-LIB \cite[\S 3]{smtlib} and the SMT signature context defined in \cite[\S 5.1 and \S 5.2]{smtlib}.
+An Alethe proof trace inherits the declarations of its input problem. All symbols (sorts, functions, assertions, etc.) declared or defined in the input problem remain declared or defined, respectively.
+Furthermore, the syntax for terms, sorts, and annotations uses the syntactic rules defined in SMT-LIB \cite[\S 3]{smtlib} and the SMT signature context defined in \cite[\S 5.1 and \S 5.2]{smtlib}.
 In the following we will represent an Alethe step as
 
-\smallskip
+\medskip
 
 \renewcommand{\eqnhighlightshade}{35}
 
@@ -94,8 +95,6 @@ In the following we will represent an Alethe step as
 \label{eq:step}
 \tag{\textcolor{purple}{1}}
 \eqnmarkbox[indexClr]{node2}{i}. \quad \eqnmarkbox[blue]{node1}{\Gamma} ~\triangleright~ \eqnmarkbox[green]{node3}{l_1 \dots l_n} \quad (\eqnmarkbox[purple]{node4}{\mathcal{R}}~\eqnmarkbox[red]{node5}{p_1 \dots p_m})~\eqnmarkbox[orange]{node6}{[a_1 \dots a_r]}
-\end{equation}
-
 \vspace{0.3em}
 \annotate[yshift=-0.5em]{below, left}{node2}{index}
 \annotate[yshift=-0.5em]{below, right}{node1}{context}
@@ -103,15 +102,16 @@ In the following we will represent an Alethe step as
 \annotate[yshift=-0.5em]{below, right}{node4}{rule}
 \annotate[yshift=-0.5em]{below, right}{node5}{premises}
 \annotate[yshift=-0.5em]{below, right}{node6}{arguments}
-
-\vspace{0.3em}
+\end{equation}
 
 \medskip
 
 A step %\cref{eq:step} 
-consists of an index \colorbox{indexClr!30}{$i$} $\in \mathbb{I}$ where $\mathbb{I}$ is a countable infinite set of indices (e.g. \kw{a0}, \kw{t1}), and a clause of formulae \colorbox{green!30}{$l_1, \dots, l_n$} representing an $n$-ary disjunction. Steps that are not assumptions are justified by a proof rule \colorbox{purple!30}{$\mathcal{R}$} that depends on a possibly empty set of premises $\{\colorbox{red!30}{$p_1 \dots  p_m$}\} \subseteq \mathbb{I}$ that only references earlier steps such that the proof forms
-a directed acyclic graph. A rule might also depend on a list of arguments \colorbox{orange!30}{$[a_1 \dots a_r]$} where each argument $a_i$ is either a term or a pair $(x_i, t_i)$ where $x_i$ is a variable and $t_i$ is a term. The interpretation of the arguments is rule specific. The context \colorbox{blue!30}{$\Gamma$} of a step is a list $c_1 \dots c_l $ where each element $c_j$ is either a variable or a variable-term tuple denoted $x_j \mapsto t_j$. Therefore, steps with a non-empty context contain variables $x_j$ that appear in \colorbox{green!30}{$l_i$} and will be substituted by $t_j$. Proof rules \colorbox{purple!30}{$\mathcal{R}$} include theory lemmas and \texttt{resolution}, which corresponds to hyper-resolution on ground first-order clauses. 
-
+consists of an index \colorbox{indexClr!30}{$i$} $\in \mathbb{I}$ where $\mathbb{I}$ is a countable infinite set of indices (e.g. \kw{a0}, \kw{t1}), and a clause of formulae \colorbox{green!30}{$l_1, \dots, l_n$} representing an $n$-ary disjunction.
+Steps that are not assumptions are justified by a proof rule \colorbox{purple!30}{$\mathcal{R}$} that depends on a possibly empty set of premises $\{\colorbox{red!30}{$p_1 \dots  p_m$}\} \subseteq \mathbb{I}$ that only references earlier steps such that the proof forms
+a directed acyclic graph. A rule might also depend on a list of arguments \colorbox{orange!30}{$[a_1 \dots a_r]$} where each argument $a_i$ is either a term or a pair $(x_i, t_i)$ where $x_i$ is a variable and $t_i$ is a term.
+The interpretation of the arguments is rule specific. The context \colorbox{blue!30}{$\Gamma$} of a step is a list $c_1 \dots c_l $ where each element $c_j$ is either a variable or a variable-term tuple denoted $x_j \mapsto t_j$.
+Therefore, steps with a non-empty context contain variables $x_j$ that appear in \colorbox{green!30}{$l_i$} and will be substituted by $t_j$. Proof rules \colorbox{purple!30}{$\mathcal{R}$} include theory lemmas and \texttt{resolution}, which corresponds to hyper-resolution on ground first-order clauses.
 
 \begin{table}[]
     \centering
@@ -129,6 +129,7 @@ a directed acyclic graph. A rule might also depend on a list of arguments \color
     \caption{Linear arithmetic rules in Alethe supported.}
     \label{table:linear-arith-rules}
 \end{table}
+\todo[ac]{add RARE rules in \cref{table:linear-arith-rules}}
 
 We now have the key components to explain the guiding proof in the bottom part of \cref{lst:smtexampleproof}.
 The proofs starts with \tt{assume} steps \tt{a0}, \tt{a1}, \tt{a2} that restate the assertions from the \textit{input problem} (\cref{lst:smtexampleproof}).
@@ -159,13 +160,12 @@ Notice that the contexts \colorbox{blue!30}{$\Gamma$} of each step are all empty
 \label{sssect:la-in-alethe}
 
 Proofs for linear arithmetic steps use a number of straightforward rules listed in \cref{table:linear-arith-rules}, such as \tt{la\_totality}: $(t_1 \leq t_2 \lor t_2 \geq t_1)$.
-Simplification rules \tt{*\_simplify}, such as \tt{sum\_simplify}, transform arithmetic formulas by applying equivalence-preserving operations repeatedly until a fixed point is reached;
-these operations are no more complex than constant folding.
 
 Following our method to encode Alethe described in \cite{ColtellacciMD24}, the linear arithmetic tautology rules \tt{la\_disequality}, \tt{la\_totality} and \tt{la\_mult\_*} are encoded as lemmas in our embedding of Alethe in Lambdapi.
-The simplification rule \tt{comp\_simplify} is encoded as a lemma for each rewrite case and applied multiple times.
-We do not support the remaining \tt{*\_simplify} rules and the \tt{la\_tautology} rule in this work, primarily because cvc5 does not follow the Alethe standard for simplification step.
-Instead, it extends the Alethe format with the RARE simplification rules \cite{rare}. As a result, cvc5 does not generate proofs using these standard rules for the SMT-LIB benchmarks.
+\todo[ac]{mention RARE rules}
+% The simplification rule \tt{comp\_simplify} is encoded as a lemma for each rewrite case and applied multiple times.
+% We do not support the remaining \tt{*\_simplify} rules and the \tt{la\_tautology} rule in this work, primarily because cvc5 does not follow the Alethe standard for simplification step.
+% Instead, it extends the Alethe format with the RARE simplification rules \cite{rare}. As a result, cvc5 does not generate proofs using these standard rules for the SMT-LIB benchmarks.
 
 A different approach is taken for the primary rules \tt{*\_generic},as they describe an algorithm.
 While \tt{la\_generic rule} is primarily intended for LRA logic, it is also applied in LIA proofs when all variables in the (in)equalities are of integer sort.
