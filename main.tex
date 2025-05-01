@@ -70,6 +70,12 @@ In the present work, we extend this approach to support the reconstruction of pr
 When the propositional model is unsatisfiable in the theory of linear real/integer arithmetic, the solver creates a proof certificate.
 The conclusion is a tautological clause of linear inequalities and equations and the justification of the step is a list of coefficients so that the linear combination is a trivially contradictory inequality after simplification (e.g., $0 \geq 1$).
 Most SMT solvers, including cvc5 and veriT, use the simplex method \cite{SRI:simplex:dpllt} to handle linear arithmetic.
+To verify these certificates, we implemented an automatic decision procedure based on proof by reflection \cite{reflection-origin-coq,ring-coq}.
+
+In \cref{sec:background}, we provide an overview of Lambdapi and present the structure of Alethe proof certificates for linear arithmetic.
+Then, in \cref{sec:elaboration-lia}, we describe how we leverage Carcara's elaboration process to reconstruct linear integer arithmetic steps, even when coefficient annotations are missing.
+In \cref{sec:lia-reconstruction} introduces our encoding of SMT linear arithmetic within Lambdapi, while in \cref{sec:recon-lambdapi} presents an automatic decision procedure, based on proof by reflection, to verify these arithmetic steps.
+An empirical evaluation of our approach is provided in \cref{sec:evaluation}. We review related work in \cref{sec:related}, and we conclude in \cref{sec:conclusion}.
 
 \input{background}
 
@@ -82,8 +88,10 @@ Most SMT solvers, including cvc5 and veriT, use the simplex method \cite{SRI:sim
 \input{evaluation}
 
 \section{Related work}
+\label{sec:related}
 
 \section{conclusion}
+\label{sec:conclusion}
 
 \bibliographystyle{splncs04}
 \bibliography{refs}

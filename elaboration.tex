@@ -1,4 +1,5 @@
 \section{The approach to reconstruct lia\_generic step}
+\label{sec:elaboration-lia}
 
 The \tt{lia\_generic} represent a challenge for reconstruction because the coefficients are not provided by the solver in the trace i.e. \colorbox{orange!30}{$[a_1 \dots a_r]$} is empty.
 We decided to leverage the elaboration process of $\tt{lia\_generic}$ performed by Carcara, as doing otherwise would require implementing Fourier-Motzkin elimination for integers, as demonstrated in \cite{omegatest,micromega} -

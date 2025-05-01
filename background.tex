@@ -1,5 +1,5 @@
 \section{Background}
-\label{sect:background}
+\label{sec:background}
 
 \subsection{An Overview of Lambdapi}
 \label{ssect:lambdapi-overview}
@@ -240,7 +240,7 @@ Additionally, step 6  was added to ensure that our construction is independent o
 
 \begin{example}
 Consider the $\tt{la\_generic}$ step in the logic \tt{QF\_UFLIA} with the uninterpreted function symbol \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize\upshape]|(f Int)|:
-\begin{lstlisting}[language=SMT,label={lst:smtexampleinput}]
+\begin{lstlisting}[language=SMT,label={lst:lageneric-example}]
 (step t11 (cl (not (<= f 0)) (<= (+ 1 (* 4 f)) 1))
   :rule la_generic :args (1/1 1/4))
 \end{lstlisting} the algorithm run as follow in a natural deduction:
