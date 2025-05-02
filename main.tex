@@ -93,6 +93,17 @@ An empirical evaluation of our approach is provided in \cref{sec:evaluation}. We
 \section{Related work}
 \label{sec:related}
 
+Proof reconstruction for Alethe produced by the veriT solver, has been evaluated within Isabelle/HOL to enhance the reconstruction success rate compared to Z3.
+The authors employed Isabelle’s \emph{linarith} procedure to replay arithmetic reasoning steps. This tactic serves as a decision procedure over real numbers, rather than integers or natural numbers, and is based on Fourier–Motzkin elimination.
+However, the authors note that Isabelle’s arithmetic procedure is incomplete and relatively inefficient for reconstructing arithmetic proofs; consequently, specific rules are reconstructed heuristically to improve performance.
+
+The work presented in \cite{micromega} proposes a modular framework for integrating SMT solvers with the Coq proof assistant, emphasizing the generation and efficient verification of proof certificates directly within Coq.
+Their approach enables fast, reflexive proof checking using Nelson-Oppen-style theory combination, and it supports both Linear Integer Arithmetic (LIA) and Linear Arithmetic (LA) logics.
+To efficiently generate Farkas certificates for LA, they implement the Simplex algorithm, while for LIA, they adopt a variant of the Omega test \cite{omegatest}.
+Their system has also been evaluated on SMT-LIB 2 benchmarks using the Z3 solver.
+
+
+
 \section{conclusion}
 \label{sec:conclusion}
 
