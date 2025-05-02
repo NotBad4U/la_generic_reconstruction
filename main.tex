@@ -49,8 +49,11 @@ Nancy \email{alessio.coltellacci@inria.fr}}
 \maketitle
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
+Modern SMT solvers can generate proofs of unsatisfiability to ensure correctness independently of their implementation.
+A dependable approach to verify these proofs is to reconstruct them within a proof assistant.
+In previous work, the SMT checker Carcara was extended to reconstruct SMT proofs in Lambdapi — a proof assistant designed for interoperability,
+supporting the import and export of proofs for integration with other proof assistants such as Rocq, Lean, or HOL-Light.
+Nevertheless, that work was limited to non-arithmetic fragments. In this paper, we present an extension that enables the reconstruction, and thus independant verification of SMT proofs involving linear integer arithmetic.
 
 \keywords{SMT \and Alethe \and LIA \and Lambdapi \and normal form \and Proof by Reflection}
 \end{abstract}
