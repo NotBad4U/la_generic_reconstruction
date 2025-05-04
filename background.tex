@@ -37,18 +37,18 @@ The typing rules of $\lpm$ are those of  $\lambda\Pi$ \cite[\S 2]{lf}, except fo
     \label{fig:lp-typing-rules}
 \end{figure}
 
-In our encoding presented in \cite{ColtellacciMD24} we employ Tarski-style universes \cite[\S Universes]{intuitype} where types are represented by elements of a base type and interpreted via the decoding function.
+In our encoding presented in \cite{ColtellacciMD24},  we employ Tarski-style universes \cite[\S Universes]{intuitype} where types are represented by elements of a base type and interpreted via the decoding function.
 We define the constant $\prop: \type$ for the type of proposition and the decoding function $\pic: \prop \ra \type$ that maps each proposition to $\type$. This is necessary because Lambdapi does not support quantification over a variable of type $\type$. More precisely, it is not possible to assign the type $\Pi X : \type,(X \ra \prop) \ra \prop$ to the universal quantifier $\forall$.
 To circumvent this, we have the constant $\set : \type$ for the types of object-terms, and a decoding function ${\el}: \set \ra \type$ that embeds $\set$ into $\type$.
 This permits us to define the quantifier as $\forall: \Pi x: \set, (\el~x \ra \prop) \ra \prop$.
-To quantify over propositions, we further define a constant $o: \set$ and add the rewrite rule  $\el\, o \re \prop$.\todo[sm]{It would perhaps be useful to explain that this is standard practice?}
+To quantify over propositions, we further define a constant $o: \set$ and add the rewrite rule  $\el\, o \re \prop$.
+This encoding is well-established in the literature on systems formalized in Lambdapi \cite{blanqui_et_al:LIPIcs.FSCD.2021.20}. 
 
 \subsection{Alethe proof}
 \label{ssect:alethe}
 
 The Alethe proof trace format \cite{alethespec} for SMT solvers comprises two parts: the trace language based on SMT-LIB and a collection of proof rules. Traces witness proofs of unsatisfiability of a set of constraints.
-They are sequences $a_1 \dots a_m~t_1 \dots t_n$ where
-the\todo[sm]{insert ``assumptions''?} $a_i$ correspond to the constraints of the original SMT problem being refuted, each $t_i$ is a clause inferred from previous elements of the sequence, and $t_n$ is $\bot$ (the empty clause).
+They are sequences $a_1 \dots a_m~t_1 \dots t_n$ where the assumptions $a_i$ correspond to the constraints of the original SMT problem being refuted, each $t_i$ is a clause inferred from previous elements of the sequence, and $t_n$ is $\bot$ (the empty clause).
 In the following, we designate the SMT-LIB problem as the \emph{input problem}.
 
 \begin{lstlisting}[language=SMT,label={lst:smtexampleinput},caption={Input problem.}]
@@ -61,9 +61,9 @@ In the following, we designate the SMT-LIB problem as the \emph{input problem}.
 (get-proof)
 \end{lstlisting}
 
-\begin{center}
-\lightning\todo[sm]{I suggest removing this.}
-\end{center}
+% \begin{center}
+% \lightning\todo[sm]{I suggest removing this.}
+% \end{center}
 
 \begin{lstlisting}[language=SMT,caption={Proof of unsatisfiability of the input problem of \protect{\cref{lst:smtexampleinput}}.},label={lst:smtexampleproof}]
 (assume a0 (or (< (+ x y) 1) (< 3 x)))
@@ -131,7 +131,7 @@ A linear inequality is an expression of the form
 %
 where $\mathop{\bowtie} \mathrel{\in} \mathop{\{=, <, >, \leq, \geq\}}$, $m\geq n$, $c_i, d_1, d_2$ are either \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize]{Int} or \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize]{Real}
 constants, and where $c_i$ and $t_i$ have the same sort for all $i$.
-Checking the clause validity of \tt{t2} and \tt{t5} in \cref{lst:smtexampleproof}, amounts to checking the unsatisfiability of the system of linear equations (we provide more details in \cref{sssect:la-in-alethe}\todo[sm]{current section?!}) e.g. $x < 3$ and $x = 2$ in \tt{t2}.
+Checking the clause validity of \tt{t2} and \tt{t5} in \cref{lst:smtexampleproof}, amounts to checking the unsatisfiability of the system of linear equations e.g. $x < 3$ and $x = 2$ in \tt{t2}.
 Coefficients for each inequality are passed as arguments e.g. $(\frac{1}{1},\frac{1}{1})$ in \tt{t2}.
 Steps \tt{t3} (and also \tt{t4}) applies the \colorbox{purple!30}{\texttt{resolution}} rule to the premises \tt{a1}, \tt{t2} (respectively \tt{t1} and \tt{t3}).
 Finally, the step \texttt{t6} concludes the proof by generating the empty clause $\bot$, concretely denoted as \kw{(cl)} in \cref{lst:smtexampleproof}.
@@ -172,7 +172,7 @@ A step of the rule \tt{la\_generic} represents a tautological clause of linear d
 the negated disequalities is unsatisfiable. After the application of some strengthening rules, the resulting conjunction is unsatisfiable,
 even if \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize\upshape]{Int} variables are assumed to be \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize\upshape]{Real} variables.
 Although the rule may introduce rational coefficients, they often reduce to integers—as shown in \cref{lst:smtexampleproof}, where the coefficients are $(\frac{1}{1}, \frac{1}{1})$.
-Cases where coefficients cannot be reduced to integers are rare in practice, however, we eliminate .\todo[sm]{eliminate what?}
+Cases where coefficients cannot be reduced to integers are rare in practice, however, we reduce them to integers by \emph{clearing denominators}.
 Let $\varphi_1,\dots, \varphi_n$ be linear inequalities and $a_1, \dots, a_n$ rational numbers, then a \tt{la\_generic} step has the general form
 %
 \[
@@ -201,12 +201,12 @@ we write $s1 \bowtie s2$ to denotes the left- and right-hand sides of an inequal
     %   If $\varphi = s_1 \leq s_2$, then let $\varphi :=  s_1 \geq - s_2$.
     %   We want a canonical form that use only the operators $>, \geq$ and =.
 
-    \item Replace $\varphi = \sum_{i=0}^{n}c_i\times{}t_i + d_1 \bowtie \sum_{i=n+1}^{m} c_i\times{}t_i + d_2$\todo[sm]{According to (1), $\varphi$ is negated!}  by $\left(\sum_{i=0}^{n}c_i\times{}t_i\right) - \left(\sum_{i=n+1}^{m} c_i\times{}t_i\right)
-    \bowtie d_2 - d_1$.
+    \item Replace $\varphi = \neg (\sum_{i=0}^{n}c_i\times{}t_i + d_1 \bowtie \sum_{i=n+1}^{m} c_i\times{}t_i + d_2)$ by $\neg (\left(\sum_{i=0}^{n}c_i\times{}t_i\right) - \left(\sum_{i=n+1}^{m} c_i\times{}t_i\right)
+    \bowtie d_2 - d_1)$.
     
-    \item \label{la_generic:str}Now $\varphi$ has the form $s_1 \bowtie d$. If all
-    variables in $s_1$ are integer-sorted then replace $s_1 \bowtie d$ by $s_1 \bowtie \lceil d \rceil$,
-    otherwise by $s_1 \bowtie \lfloor d\rfloor + 1$.
+    \item \label{la_generic:str}Now $\varphi$ has the form $\neg (s_1 \bowtie d)$. If all
+    variables in $s_1$ are integer-sorted then replace $\neg (s_1 \bowtie d)$ by $\neg (s_1 \bowtie \lceil d \rceil)$,
+    otherwise by $\neg (s_1 \bowtie \lfloor d\rfloor + 1)$.
 
     % \begin{center}
     % \begin{tabular}{r|l|l}
@@ -221,21 +221,20 @@ we write $s1 \bowtie s2$ to denotes the left- and right-hand sides of an inequal
     then $a_i \coloneq a_i \times \mathit{lcd}(a_1 \dots a_n)$ where $\mathit{lcd}$ is the least common denominator of $[a_1 \dots a_n]$.
     
     \item If $\bowtie$ is $=$, then replace $\varphi$ by
-    $\sum_{i=0}^{m}a\times{}c_i\times{}t_i = a\times{}d$, otherwise replace it by
-    $\sum_{i=0}^{m}|a|\times{}c_i\times{}t_i \bowtie |a|\times{}d$.
+    $\neg (\sum_{i=0}^{m}a\times{}c_i\times{}t_i = a\times{}d)$, otherwise replace it by
+    $\neg (\sum_{i=0}^{m}|a|\times{}c_i\times{}t_i \bowtie |a|\times{}d)$.
 
-    \item Finally, the sum of the resulting literals is trivially contradictory.
-    The sum
+    \item Finally, the sum of the resulting literals is trivially contradictory,
     \[
         \sum_{k=1}^{n}\sum_{i=1}^{m}c_i^k*t_i^k \bowtie \sum_{k=1}^{n}d^k
     \]
-  where $c_i^k$ and $t_i^k$ are the constant and term from the literal $\varphi_k$, and $d^k$ is the constant $d$ of $\varphi_k$.\todo[sm]{incomplete sentence}
+  where $c_i^k$ and $t_i^k$ are the constant and term from the literal $\varphi_k$, and $d^k$ is the constant $d$ of $\varphi_k$.
   The operator $\bowtie$ is $=$ if all operators are $=$, $>$ if all are either $=$ or $>$, and $\geq$ otherwise. Finally, the sum on the left-hand side is $0$ and the right-hand side is $>0$ (or $\geq 0$ if $\bowtie$ is $>$).
 
 \end{enumerate}
 
 The above algorithm is adapted from the Alethe specification \cite{alethespec}, except that we clarified step 1: the subsequent steps in the original algorithm are designed for $>$ and $\geq$ and do not clearly address how to handle $<$ and $\leq$.
-Additionally, we added step 6\todo[sm]{step 4?} in order to ensure that our construction is independent of $\mathbb{Q}$.
+Additionally, we added step 4 in order to ensure that our construction is independent of $\mathbb{Q}$.
 
 \begin{example}
 Consider the $\tt{la\_generic}$ step in the logic \tt{QF\_UFLIA} with the uninterpreted function symbol \lstinline[language=SMT,basicstyle=\ttfamily\upshape]|(f Int)|:
@@ -244,15 +243,14 @@ Consider the $\tt{la\_generic}$ step in the logic \tt{QF\_UFLIA} with the uninte
   :rule la_generic :args (1/1 1/4))
 \end{lstlisting} 
 %
-The algorithm then performs the following steps:\todo[sm]{Since $\vdash$ doesn't appear above, why add it here?} % run as follow in a natural deduction:
+The algorithm then performs the following steps:
 \begin{align}
-&\vdash \neg (- f > 0),~ \neg(4f > 0) \label{eq:step2}\tag{Step 2}\\
-&\vdash \neg (- f > 0),~ \neg(4f \geq 1) \label{eq:step3}\tag{Step 3}\\
-&\text{Replace } a = [\frac{1}{1}, \frac{1}{4}] \text{ by } a = [4, 1] \label{eq:step4}\tag{Step 4}\\
-&\vdash \neg (|4| * - f > |4| * 0 ), ~ \neg(|1| * 4f \geq |1| * 1) \label{eq:step5}\tag{Step 5} \\
-&-4f + 4f \geq 1 \vdash \mathtt{False} \label{eq:step6}\tag{Step 6}
+&\neg (- f > 0),~ \neg(4f > 0) \label{eq:step2}\tag{Step 2}\\
+&\neg (- f > 0),~ \neg(4f \geq 1) \label{eq:step3}\tag{Step 3}\\
+&\text{Replace } a = [\frac{1}{1}, \frac{1}{4}] \text{ by } a = [4, 1] \text{ due to clearing denominators} \label{eq:step4}\tag{Step 4}\\
+&\neg (|4| * - f > |4| * 0 ), ~ \neg(|1| * 4f \geq |1| * 1) \label{eq:step5}\tag{Step 5} \\
+&-4f + 4f \geq 1 \label{eq:step6}\tag{Step 6}
 \end{align}
-\todo[ac]{Je met $\vdash$ car je trouve que la dérivation ce comprend mieu de mon point de vue. Mais je peux l'enlever si trop de confusion est ajouté.}
 Which sums to the contradiction  $0 \geq 1$.
 \label{ex:la_generic_example_red}
 \end{example}
