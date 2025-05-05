@@ -11,7 +11,7 @@ It relies on the following definitions: let $P: Z \ra \prop$ be a predicate over
 If $\mathop{f} z$ reduces to \tt{true}, then the proof term  $\tt{f\_correct}~z~(\tt{relf}\,\tt{bool}\,\tt{true})$ with $\tt{refl}: \Pi A: \set, \Pi x: \el\,A, \pic (x = x)$, constitutes a proof of predicate $(P~z)$. In step 6 of the $\tt{la\_generic}$,
 the primary challenge lies in reasoning modulo associativity and commutativity when manipulating expressions over $\bb{Z}$.
 The key idea is to provide a normalization function that transforms a $\bb{Z}$ expression into a canonical form,
-such that it can be reduce to a constant because variables will cancel each other, as is the case with $f$ in \cref{ex:la_generic_example_red}.
+such that it can be reduce to a constant because variables will cancel each other, as is the case with the constant $f$ in \cref{ex:la_generic_example_red}.
 
 
 \subsection{Representation}
@@ -20,6 +20,7 @@ such that it can be reduce to a constant because variables will cancel each othe
 The procedure is based on an algebraic group structure, denoted as  $\bb{G}$ defined in \cref{fig:grp} which represents linear polynomials.
 The base type for the elements of this group is specified as $\bb{G}: \type$. The unary operator $\tt{cst}$ denotes a constant from $\bb{Z}$.
 A $\tt{var}$ constructor for "catch-all" case for subexpressions that we cannot model. These subexpressions will correspond to actual variables in $\bb{Z}$.
+This constructor takes two arguments — both in $\bb{Z}$ — where the first denotes a constant coefficient and the second a variable identifier; further justification for this design will be provided later.
 The constructor $\tt{mul}$  represents the multiplication of an element of $\bb{G}$ by a constant. The constructor $\tt{opp}$ corresponds to the inverse operator within the group.
 Lastly, the constructor $\tt{add}$ represent the addition between two elements of \cref{fig:grp}.
 
@@ -46,7 +47,7 @@ ensures that expressions involving sums of products are systematically canonical
 \label{fig:grp}
 \end{figure}
 
-\subsection{Normalization}
+\subsection{Associative Commutative Normalization}
 \label{ssec:normalization}
 
 \begin{figure}
@@ -73,7 +74,8 @@ ensures that expressions involving sums of products are systematically canonical
 
 For \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} symbols, Lambdapi does not use matching modulo AC \cite{matching-mod-AC,kirchner_rsp} as this problem is NP-complete \cite{ac-modulo-np-complete}.
 Instead, Lambdapi transforms sum expression of the form $\add{\var{c_1}{a_1}}{\add{\var{c_2}{a_2}}{\add{\dots}{\var{c_n}{a_n}}}}$ into a canonical form, ensuring that any pair of terms $\var{p}{x}$ and $\var{q}{x}$ involving the same variable $x$ are placed adjacent to each other.
-In this way, we will use the rewriting rules $\cref{fig:grp-rw}$ to reduce expressions in canonical form. Notably, the resulting normal forms do not contain the constructors $\tt{mul}$ and $\tt{opp}$, as the associated rewrite rules eliminate them in favor of $\tt{var}, \tt{add}$ and $\tt{cst}$.
+This order is generalized by Lambdapi for any binary constructor \todo[ac]{Review this phrase}.
+In this way, we will use the rewriting rules $\cref{fig:grp-rw}$ to reduce $\bb{G}$ expressions in canonical form. Notably, the resulting normal forms do not contain the constructors $\tt{mul}$ and $\tt{opp}$, as the associated rewrite rules eliminate them in favor of $\tt{var}, \tt{add}$ and $\tt{cst}$.
 
 \begin{definition}[AC-canonical form]
 Let $\leq$ be a total order on $\bb{G}$-terms defined as follows:
@@ -85,24 +87,24 @@ Let $\twoheadrightarrow^{AC}$ be the relation mapping every term t to its unique
  Two terms are AC-equivalent iff their AC-canonical forms are equal.
 
 \begin{definition}[Rewriting modulo AC-canonization]
-Let $\longrightarrow^{AC}_\Sigma = \re_\Sigma\twoheadrightarrow^{AC}$, where $\Sigma$ contains the rewrite rules of \cref{fig:arith-ops,fig:grp-rw}. 
+Let $\ACcanon = \re_\Sigma\twoheadrightarrow^{AC}$, where $\Sigma$ contains the rewrite rules of \cref{fig:arith-ops,fig:grp-rw}. 
  \end{definition}
 
-An $\longrightarrow^{AC}_\Sigma$ step is a standard $\re_\Sigma$ step with syntactic matching followed by ACcanonization. We now prove that the relation $\longrightarrow^{AC}_\Sigma$ terminates and is confluent.
+An $\ACcanon$ step is a standard $\re_\Sigma$ step with syntactic matching followed by ACcanonization. We now prove that the relation $\ACcanon$ terminates and is confluent.
 
-\begin{lemma} The matching modulo AC relation $\longrightarrow_{\Sigma/AC} = \mathop{\simeq_{AC}}\re_\Sigma\mathop{\simeq_{AC}}$, which contains $\longrightarrow^{AC}_\Sigma$, terminates.
-\begin{proof} \upshape{AProVE \cite{aprove}} automatically proves the termination of $\longrightarrow_{\Sigma/AC}$. \end{proof}
+\begin{lemma} The matching modulo AC relation $\rwModAC = \mathop{\simeq_{AC}}\re_\Sigma\mathop{\simeq_{AC}}$, which contains $\ACcanon$, terminates.
+\begin{proof} \upshape{AProVE \cite{aprove}} automatically proves the termination of $\rwModAC$. \end{proof}
 \end{lemma}
 
-\begin{lemma} $\longrightarrow^{AC}_\Sigma$ is locally confluent on AC-canonical.
+\begin{lemma} $\ACcanon$ is locally confluent on AC-canonical.
 \begin{proof}
-We show that every critical pair is joinable using $\longrightarrow^{AC}_\Sigma$ and confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
+We show that every critical pair is joinable using $\ACcanon$ and confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
 % In the following, the terms that are not between square brackets are in AC-canonical form. We also write $[\add{p}{q}]$ to denote either $\add{p}{q}$ or $\add{q}{p}$.
 \end{proof}
 \end{lemma}
 
-To compare two $\bb{Z}$-terms, $t_1$ and $t_2$ wrt $\longrightarrow^{AC}_\Sigma$, the procedure involves reifying them into their corresponding $\bb{G}$-terms, denoted $[g_1]$ and $[g_2]$, using the reification function $\reify{(\_)}$,
-and put in normal forms. Following the reduction rules specified in \cref{fig:grp-rw}, we can then compare their corresponding $\bb{Z}$-terms by applying the denotation function $\den{(\_)}$.
+To compare two $\bb{Z}$-terms, $t_1$ and $t_2$ wrt $\ACcanon$, the procedure involves reifying them into their corresponding $\bb{G}$-terms, denoted $[g_1]$ and $[g_2]$, using the reification function $\reify{(\_)}$,
+and put in normal forms by $\twoheadrightarrow^{AC}$. Following the reduction rules specified in \cref{fig:grp-rw}, we can then compare their corresponding $\bb{Z}$-terms by applying the denotation function $\den{(\_)}$.
 To validate this procedure, it is necessary to establish the correctness of the following diagram:
 
 \begin{figure}

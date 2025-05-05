@@ -1,7 +1,7 @@
 \section{Encoding of Linear Integer Arithmetic in Lambdapi}
 \label{sec:encoding}
 
-\subsection{Encoding of Integers in Lambdapi}
+\subsection{Encoding Integers in Lambdapi}
 
 
 \begin{figure}
@@ -14,7 +14,7 @@
 &\tt{pos}: \set & &\tt{int}: \set & &\tt{comp}: \set & &\tt{bool}: \set \\
 &\el~\tt{pos} \re \bb{P} & &\el~\tt{int} \re \bb{Z} & &\el~\tt{comp} \re \tt{Comp} & &\el~\tt{bool} \re \bb{B}
 \end{align*}
-\caption{Overview of inductive types for integers and manipulating them}
+\caption{Inductive types definitions for binary positive number, integers, comparison and boolean.}
 \label{fig:sorts-constructors}
 \end{figure}
 
@@ -22,10 +22,10 @@ The definition we use of integers in Lambdapi in \cref{fig:sorts-constructors} f
 First, the type $\bb{P}$  is an inductive type representing strictly positive integers in binary form.
 Starting from 1 (represented by constructor \tt{H}), one can add a new least significant digit via the constructor \tt{O} (digit 0) or constructor \tt{I} (digit 1). 
 The type $\bb{Z}$ is an inductive type representing integers in binary form.
-An integer is either zero (with constructor \tt{Z0}) or a strictly positive number \tt{Zpos} (coded as a $\bb{P}$) or a strictly negative number \tt{Zneg} (whose opposite is stored as a $\bb{P}$ value).
+An integer is either zero (with constructor \tt{Z0}) or a strictly positive number \tt{Zpos} (coded as a $\bb{P}$) or a strictly negative number \tt{Zneg}. %(whose opposite is stored as a $\bb{P}$ value).
 %
 To enable quantification over integers, positive binary numbers, booleans, and comparison results, we introduce constants such as $\tt{int}: \set$ that represents codes for these types along with a rewrite rule that rewrite code to its corresponding type, for example $\el~\tt{int} \re \bb{Z}$.
-The comparison inductive type $\tt{Comp}$ is used to specify comparison function. The infix function $\doteq$ define a decidable order comparison between two terms of type $\bb{Z}$. Similarly for $\bb{P}$ with the infix function $\tt{cmp}: \bb{P} \ra \bb{P} \ra \tt{Comp}$.
+The comparison inductive type $\tt{Comp}$ is used to specify comparison function. In \cref{fig:arith-ops}, the infix function $\doteq$ define a decidable order comparison between two terms of type $\bb{Z}$. Similarly for $\bb{P}$ with the infix function $\tt{cmp}: \bb{P} \ra \bb{P} \ra \tt{Comp}$.
 
 \begin{figure}
 \centering
@@ -87,13 +87,13 @@ The comparison inductive type $\tt{Comp}$ is used to specify comparison function
 &\geq: \bb{Z} \ra \bb{Z} \ra \prop  \coloneq \lambda x,\lambda y, \neg (x < y) & &\tt{istrue}~\tt{false} \re \bot \\
 &>: \bb{Z} \ra \bb{Z} \ra \prop  \coloneq \lambda x,\lambda y, \neg (x \leq y) & & \\
 \end{align*}
-\caption{Decidable equality, $+$ operator and inequalities relations definitions for $\bb{Z}$}
+\caption{Definitions for the decidable equality $\doteq$, $+$ operator and inequalities relations.}
 \label{fig:arith-ops}
 \end{figure}
 
-The arithmetic operator such as $+$ are constants defined by rewriting rules. In the following sections, we will refers to the rewriting rules for integers as $\ra_\bb{Z}$ and positive binary numbers as $\ra_\bb{P}$.
+The arithmetic operator such as $+$ are $\lpm$ constants defined by rewriting rules. In the following sections, we will refers to the rewriting rules for integers as $\ra_\bb{Z}$ and positive binary numbers as $\ra_\bb{P}$.
 The confluence of the rewriting rules for the arithmetic of $\mathbb{Z}$ and $\mathbb{P}$ has been proven using CSI \cite{CSI}. A detailed proof of confluence can be found in \cref{app:confluence-int-pos}.
-The inequality symbols for $\bb{Z}$ are binary predicates defined by rewriting rules over the decidable equality $\doteq$. They reduce to $\top$, $\bot$ (or negated) by $\equivL$ with rules of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
+The inequalities symbols for $\bb{Z}$ are binary predicates defined by rewriting rules over the decidable equality $\doteq$. They reduce to $\top$, $\bot$ (or negated) by $\equivL$ with rules of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
 For example, $1 < 2 \hookrightarrow \tt{istrue}(\tt{isLt}(1 \doteq 2)) \hookrightarrow \tt{istrue}(\tt{isLt}(\tt{Lt})) \hookrightarrow \tt{istrue}(\tt{true}) \hookrightarrow \top$.
 
 \subsection{Functions used in the translation}
@@ -110,8 +110,8 @@ Our translation is based on the following functions:
 \end{itemize}
 
 \begin{definition}[Function $\mathcal{D}$ translating SMT sort and function symbol declarations]
-For each sort symbol $s$ with arity $n$ in $\Theta^\cal{S}$ we create a constant $s: \set^0 \ra \dots \ra^{n-1} \set$.
-For each function symbol $f~\sigma^+$ in $\Theta^\cal{F}$ we create a constant $f: \cal{S}(\sigma^+)$.
+For each sort symbol $s$ with arity $n$ in $\Theta^\cal{S}$ we create a constant $s: \set \ra^1 \dots \ra^{n} \set$.
+For each function symbol $(f~\sigma^+)$ in $\Theta^\cal{F}$ we create a constant $f: \cal{S}(\sigma^+)$.
 \end{definition}
 
 \begin{definition}[Function $\mathcal{S}$ translating sorts of expression] 
@@ -137,9 +137,8 @@ The definition of $\E{e}$ is as follows.
 \end{itemize}
 \end{definition}
 
-We defined the function $\pid: \tt{Clause} \ra \type$, mapping each clause $c$ to the type $\pid~c$ of its proofs.
-The type $\tt{Clause}: \type$ represent the type of clause encoded as list \cite[\S 3]{ColtellacciMD24}
-with the constructor $\veedot: \prop \ra \tt{Clause} \ra \tt{Clause}$ and the empty clause $\nil: \tt{clause}$.
+We defined the function $\pid: \tt{Clause} \ra \type$ \cite[\S 3]{ColtellacciMD24}, mapping each clause $c$ to the type $\pid~c$ of its proofs.
+The type $\tt{Clause}: \type$ represent the type of clause encoded as list with the constructor $\veedot: \prop \ra \tt{Clause} \ra \tt{Clause}$ and the empty clause $\nil: \tt{clause}$.
 The function $\cal{C}$ encodes each step by invoking the functions $\cal{D},\cal{S}$ and $\cal{E}$, and provides a proof term corresponding to the Alethe rule applied at that step.
 
 \begin{example}
@@ -155,8 +154,8 @@ opaque symbol t5: $\pid$ (¬ (x + y < 1) ⟇ (¬ (x = 2))  ⟇ (¬ (0 = y)) ⟇ 
 \end{example}
 
 The proof terms generated by $\mathcal{C}$ for steps \texttt{t2} and \texttt{t5} must faithfully represent the algorithm presented in \cref{sssect:la-in-alethe}.
-While steps 1 through 7 of the algorithm correspond to explicit rewriting steps, the final step (step 8) — which involves summing all inequalities — represents a multi-step rewriting sequence.
-This sequence reduced the initial sum to a decidable comparison between constants (e.g. $0 > 1 \re \bot$), which serves as the conclusion of the reduction.
+While steps 1 through 5 of the algorithm correspond to explicit rewriting steps, the final step (step 6) — which involves summing all inequalities — represents a multi-step rewriting sequence.
+This sequence reduced the initial sum to a decidable comparison between constants (e.g. $0 > 1 \re \bot$), which serves as the conclusion of the reduction to prove a contradiction.
 
 
 The reflection technique introduced by \cite{reflection-origin-coq} leverages the reduction system of the proof assistant to produce an efficient decidable automatic
