@@ -1,8 +1,8 @@
 \section{Reconstruction of linear arithmetic for LIA logic}
 \label{sec:lia-reconstruction}
 
-Proof by reflection is a technique used to write certified automation procedure by reducing the validity of a logical statement to a symbolic computation.
-It relies on the following definitions: let $P: Z \ra \prop$ be a predicate over a data type Z and we have a function $f: Z \ra \tt{bool}$ such that the following theorem holds:
+Proof by reflection is a technique for writing certified automation procedures. It reduces the validity of a logical statement to a symbolic computation.
+It relies on the following definitions: let $P: Z \ra \prop$ be a predicate over a data type Z, and we have a function $f: Z \ra \tt{bool}$ such that the following theorem holds:
 
 \begin{equation*}
 \tt{f\_correct} : \forall z: Z, (f~z = \tt{true}) \ra (P~z)
@@ -11,18 +11,18 @@ It relies on the following definitions: let $P: Z \ra \prop$ be a predicate over
 If $\mathop{f} z$ reduces to \tt{true}, then the proof term  $\tt{f\_correct}~z~(\tt{relf}\,\tt{bool}\,\tt{true})$ with $\tt{refl}: \Pi A: \set, \Pi x: \el\,A, \pic (x = x)$, constitutes a proof of predicate $(P~z)$. In step 6 of the $\tt{la\_generic}$,
 the primary challenge lies in reasoning modulo associativity and commutativity when manipulating expressions over $\bb{Z}$.
 The key idea is to provide a normalization function that transforms a $\bb{Z}$ expression into a canonical form,
-such that it can be reduce to a constant because variables will cancel each other, as is the case with the constant $f$ in \cref{ex:la_generic_example_red}.
+such that it can be reduced to a constant because variables will cancel each other, as is the case with the constant $f$ in \cref{ex:la_generic_example_red}.
 
 
 \subsection{Representation}
 \label{ssec:representation}
 
 The procedure is based on an algebraic group structure, denoted as  $\bb{G}$ defined in \cref{fig:grp} which represents linear polynomials.
-The base type for the elements of this group is specified as $\bb{G}: \type$. The unary operator $\tt{cst}$ denotes a constant from $\bb{Z}$.
-A $\tt{var}$ constructor for "catch-all" case for subexpressions that we cannot model. These subexpressions will correspond to actual variables in $\bb{Z}$.
+The base type for this group's elements is $\bb{G}: \type$. The unary operator $\tt{cst}$ denotes a constant from $\bb{Z}$.
+A $\tt{var}$ constructor for "catch-all" case for subexpressions that we cannot model. These subexpressions correspond to actual variables in $\bb{Z}$.
 This constructor takes two arguments — both in $\bb{Z}$ — where the first denotes a constant coefficient and the second a variable identifier; further justification for this design will be provided later.
 The constructor $\tt{mul}$  represents the multiplication of an element of $\bb{G}$ by a constant. The constructor $\tt{opp}$ corresponds to the inverse operator within the group.
-Lastly, the constructor $\tt{add}$ represent the addition between two elements of \cref{fig:grp}.
+Lastly, the constructor $\tt{add}$ represents the addition between two elements of \cref{fig:grp}.
 
 To support associative and commutative operations, Lambdapi provides the modifiers \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative symbol},
 ensuring that terms are systematically placed into a canonical form given a builtin ordering relation, as described in \cite{ACorigin} and \cite[\S 5]{univAC}.
@@ -128,7 +128,7 @@ by the correctness theorem:
 For all $\bb{G}$-terms $t$, we have $(\den{[t]}) = (\den{t})$ where $[t]$ is the AC-canonical form of $t$ with respect to $\longrightarrow^{AC}_\Sigma$.
 \end{theorem}
 
-We make use of \cref{lem:conv} to embed $\bb{Z}$-terms into $\bb{G}$ in order to normalize and subsequent comparison.
+We make use of \cref{lem:conv} to embed $\bb{Z}$-terms into $\bb{G}$ to normalize and subsequent comparison.
 
 \begin{lemma}[Conversion]
 For all $x: \bb{Z}$, we have $x = (\mathop{\den{(\reify{x})}})$.

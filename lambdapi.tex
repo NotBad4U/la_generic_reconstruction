@@ -20,12 +20,12 @@
 
 The definition we use of integers in Lambdapi in \cref{fig:sorts-constructors} follows a common encoding found in many other theories, including the one adopted in the Rocq standard library \cite{Rocq-refman}.
 First, the type $\bb{P}$  is an inductive type representing strictly positive integers in binary form.
-Starting from 1 (represented by constructor \tt{H}), one can add a new least significant digit via the constructor \tt{O} (digit 0) or constructor \tt{I} (digit 1). 
+Starting from 1 (represented by the constructor \tt{H}), one can add a new least significant digit via the constructor \tt{O} (digit 0) or the constructor \tt{I} (digit 1). 
 The type $\bb{Z}$ is an inductive type representing integers in binary form.
 An integer is either zero (with constructor \tt{Z0}) or a strictly positive number \tt{Zpos} (coded as a $\bb{P}$) or a strictly negative number \tt{Zneg}. %(whose opposite is stored as a $\bb{P}$ value).
 %
 To enable quantification over integers, positive binary numbers, booleans, and comparison results, we introduce constants such as $\tt{int}: \set$ that represents codes for these types along with a rewrite rule that rewrite code to its corresponding type, for example $\el~\tt{int} \re \bb{Z}$.
-The comparison inductive type $\tt{Comp}$ is used to specify comparison function. In \cref{fig:arith-ops}, the infix function $\doteq$ define a decidable order comparison between two terms of type $\bb{Z}$. Similarly for $\bb{P}$ with the infix function $\tt{cmp}: \bb{P} \ra \bb{P} \ra \tt{Comp}$.
+The comparison inductive type $\tt{Comp}$ is used to specify a comparison function. In \cref{fig:arith-ops}, the infix function $\doteq$ defines a decidable order comparison between two terms of type $\bb{Z}$. Similarly for $\bb{P}$ with the infix function $\tt{cmp}: \bb{P} \ra \bb{P} \ra \tt{Comp}$.
 
 \begin{figure}
 \centering
@@ -91,7 +91,7 @@ The comparison inductive type $\tt{Comp}$ is used to specify comparison function
 \label{fig:arith-ops}
 \end{figure}
 
-The arithmetic operator such as $+$ are $\lpm$ constants defined by rewriting rules. In the following sections, we will refers to the rewriting rules for integers as $\ra_\bb{Z}$ and positive binary numbers as $\ra_\bb{P}$.
+The arithmetic operators such as $+$ are $\lpm$ constants defined by rewriting rules. In the following sections, we will refer to the rewriting rules for integers as $\ra_\bb{Z}$ and positive binary numbers as $\ra_\bb{P}$.
 The confluence of the rewriting rules for the arithmetic of $\mathbb{Z}$ and $\mathbb{P}$ has been proven using CSI \cite{CSI}. A detailed proof of confluence can be found in \cref{app:confluence-int-pos}.
 The inequalities symbols for $\bb{Z}$ are binary predicates defined by rewriting rules over the decidable equality $\doteq$. They reduce to $\top$, $\bot$ (or negated) by $\equivL$ with rules of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
 For example, $1 < 2 \hookrightarrow \tt{istrue}(\tt{isLt}(1 \doteq 2)) \hookrightarrow \tt{istrue}(\tt{isLt}(\tt{Lt})) \hookrightarrow \tt{istrue}(\tt{true}) \hookrightarrow \top$.
@@ -138,8 +138,8 @@ The definition of $\E{e}$ is as follows.
 \end{definition}
 
 We defined the function $\pid: \tt{Clause} \ra \type$ \cite[\S 3]{ColtellacciMD24}, mapping each clause $c$ to the type $\pid~c$ of its proofs.
-The type $\tt{Clause}: \type$ represent the type of clause encoded as list with the constructor $\veedot: \prop \ra \tt{Clause} \ra \tt{Clause}$ and the empty clause $\nil: \tt{clause}$.
-The function $\cal{C}$ encodes each step by invoking the functions $\cal{D},\cal{S}$ and $\cal{E}$, and provides a proof term corresponding to the Alethe rule applied at that step.
+The type $\tt{Clause}: \type$ represents the type of clause encoded as a list with the constructor $\veedot: \prop \ra \tt{Clause} \ra \tt{Clause}$ and the empty clause $\nil: \tt{clause}$.
+The function $\cal{C}$ encodes each step by invoking the functions $\cal{D},\cal{S}$, and $\cal{E}$, and provides a proof term corresponding to the Alethe rule applied at that step.
 
 \begin{example}
 The translation of the steps t2 and t5 in \cref{lst:smtexampleproof} with the input problem definitions give us:
@@ -159,5 +159,5 @@ This sequence reduced the initial sum to a decidable comparison between constant
 
 
 The reflection technique introduced by \cite{reflection-origin-coq} leverages the reduction system of the proof assistant to produce an efficient decidable automatic
-procedure for solving arithmetic goals over $\bb{Q}, \bb{R}$ and $\bb{Z}$. We decided to follow this approach to implement our decision procedure for evaluating inequality.
-In the following section, we describe how we implemented this procedure for our case, and how we extended the definition of $\mathcal{C}$.
+procedure for solving arithmetic goals over $\bb{Q}, \bb{R}$ and $\bb{Z}$. We followed this approach to implement our decision procedure for evaluating inequality.
+In the following section, we describe how we implemented this procedure for our case and extended the definition of $\mathcal{C}$.
