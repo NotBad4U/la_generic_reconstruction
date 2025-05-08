@@ -1,14 +1,14 @@
 \section{Reconstruction of linear arithmetic for LIA logic}
 \label{sec:lia-reconstruction}
 
-Proof by reflection is a technique for writing certified automation procedures. It reduces the validity of a logical statement to a symbolic computation.
-It relies on the following definitions: let $P: Z \ra \prop$ be a predicate over a data type Z, and we have a function $f: Z \ra \tt{bool}$ such that the following theorem holds:
+Proof by reflection is a technique for writing certified procedures for automated reasoning. It reduces the validity of a logical statement to a symbolic computation.
+Let $P: Z \ra \prop$ be a predicate over a data type Z and $f: Z \ra \tt{bool}$ be a function such that the following theorem holds:
 
 \begin{equation*}
 \tt{f\_correct} : \forall z: Z, (f~z = \tt{true}) \ra (P~z)
 \end{equation*}
 
-If $\mathop{f} z$ reduces to \tt{true}, then the proof term  $\tt{f\_correct}~z~(\tt{relf}\,\tt{bool}\,\tt{true})$ with $\tt{refl}: \Pi A: \set, \Pi x: \el\,A, \pic (x = x)$, constitutes a proof of predicate $(P~z)$. In step 6 of the $\tt{la\_generic}$,
+If $\mathop{f} z$ reduces to \tt{true}, then the proof term  $\tt{f\_correct}~z~(\tt{refl}~\tt{bool}~\tt{true})$ with $\tt{refl}: \Pi A: \set,\, \Pi x: \el\,A,\, \pic (x = x)$, constitutes a proof of predicate $(P~z)$. In step 6 of checking an application of rule \tt{la\_generic},
 the primary challenge lies in reasoning modulo associativity and commutativity when manipulating expressions over $\bb{Z}$.
 The key idea is to provide a normalization function that transforms a $\bb{Z}$ expression into a canonical form,
 such that it can be reduced to a constant because variables will cancel each other, as is the case with the constant $f$ in \cref{ex:la_generic_example_red}.
@@ -17,39 +17,41 @@ such that it can be reduced to a constant because variables will cancel each oth
 \subsection{Representation}
 \label{ssec:representation}
 
-The procedure is based on an algebraic group structure, denoted as  $\bb{G}$ defined in \cref{fig:grp} which represents linear polynomials.
-The base type for this group's elements is $\bb{G}: \type$. The unary operator $\tt{cst}$ denotes a constant from $\bb{Z}$.
-A $\tt{var}$ constructor for "catch-all" case for subexpressions that we cannot model. These subexpressions correspond to actual variables in $\bb{Z}$.
-This constructor takes two arguments — both in $\bb{Z}$ — where the first denotes a constant coefficient and the second a variable identifier; further justification for this design will be provided later.
-The constructor $\tt{mul}$  represents the multiplication of an element of $\bb{G}$ by a constant. The constructor $\tt{opp}$ corresponds to the inverse operator within the group.
-Lastly, the constructor $\tt{add}$ represents the addition between two elements of \cref{fig:grp}.
+The procedure is based on an algebraic group structure, denoted as  $\bb{G}$ defined in \cref{fig:grp}, which represents linear polynomials.
+The base type for this group's elements is $\bb{G}: \type$. The unary operator $\tt{cst}$ injects constants from $\bb{Z}$ into $\bb{G}$.
+The term $\tt{var}~c~x$ is intended for representing expressions $c \times x$ where $c$ is an integer coefficient and $x$ a $\bb{Z}$ term, in particular a variable, that appear as constituents of linear inequalities.
+%The $\tt{var}$ constructor represents a ``catch-all'' case for subexpressions that we cannot model. These subexpressions correspond to actual variables in $\bb{Z}$.
+%This constructor takes two arguments — both in $\bb{Z}$ — where the first denotes a constant coefficient and the second a variable identifier; further justification for this design will be provided later.
+The constructor $\tt{mul}$  represents the multiplication of an element of $\bb{G}$ by a constant. The constructor $\tt{opp}$ corresponds to unary minus.
+Lastly, the constructor $\add{}{}$ represents the addition between two elements of $\bb{G}$.
 
-To support associative and commutative operations, Lambdapi provides the modifiers \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative symbol},
-ensuring that terms are systematically placed into a canonical form given a builtin ordering relation, as described in \cite{ACorigin} and \cite[\S 5]{univAC}.
-Applying the \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} modifiers to the infix constructor $\add{}{}$,
-ensures that expressions involving sums of products are systematically canonicalized. Thus, equal variables are placed next to each other, facilitating simplification.
+Lambdapi provides the modifiers \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} for supporting associative and commutative operations,
+ensuring that terms are systematically transformed into a canonical form w.r.t.\ a builtin ordering relation, as described in \cite{univAC,ACorigin}. We declare the operator $\add{}{}$ as \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative},
+ensuring that expressions involving sums of elements of $\bb{G}$ are systematically canonicalized. In particular, terms of the form $\tt{var}~c~x$ for equal variables will be placed next to each other, facilitating simplification.
 
+\todo[sm]{Fig.4: Multiplication $*$ on $\bb{Z}$ was not introduced before. Also, is $*$ (used in $\reify{}$) the same as $\times$ (used in $\den{}$)? In the reification rules for multiplication, I don't understand why \tt{Zpos} and \tt{Zneg} are handled in the same way, i.e. the sign is forgotten? As it stands, the definition is not even type-correct. And in fact, why not just transform $c * x$ to $\tt{var}~c~x$?}
 \begin{figure}
 \begin{align*}
 & \bb{G}: \type & & \reify{} : \bb{Z} \ra \bb{G} & & \den{}: \bb{G} \ra \bb{Z} \\
 &|~\add{}{}: \bb{G} \ra \bb{G} \ra \bb{G} & & \reify{\tt{Z0}} \re \cst{\tt{Z0}} & & \den{\cst{c}} \re c \\
-&|~\tt{var}: \bb{Z} \ra \bb{Z} \ra \bb{G} & & \mathop{\reify{\tt{ZPos}}} c \re \cst{c} & & \den{\opp{x}} \re  \sim (\den{x}) \\
+&|~\tt{var}: \bb{Z} \ra \bb{Z} \ra \bb{G} & & \mathop{\reify{\tt{ZPos}}} c \re \cst{c} & & \den{\opp{x}} \mathrel{\re}  \mathop{\sim (\den{x})} \\
 &|~\tt{mul}: \bb{Z} \ra \bb{G} \ra \bb{G} & & \mathop{\reify{\tt{ZNeg}}} c \re \cst{c} & & \den{\mul{c}{x}} \re  c \times (\den{x}) \\
 &|~\tt{opp}: \bb{G} \ra \bb{G} & & \reify{(x + y)} \re \add{(\reify{x})}{(\reify{y})} & & \den{\add{x}{y}} \re (\den{x}) + (\den{y}) \\
 &|~\tt{cst}: \bb{Z} \ra \bb{G} & & \reify{(\sim x)} \re \opp{\reify{x}} & & \den{\var{c}{x}} \re  c \times x \\
-&\tt{grp}: \set & & \mathop{\reify{(\mathop{\tt{Zpos}} c) * x}} \re \mul{c}{(\reify{x})}  & & \\
-&\el~\tt{grp} \re \bb{G} & & \mathop{\reify{(\mathop{\tt{ZNeg}} c) * x}} \re \mul{c}{(\reify{x})} & & \\
-& & & \mathop{\reify{x * (\mathop{\tt{Zpos}} c)}} \re \mul{c}{(\reify{x})}  & & \\
-& & & \mathop{\reify{x * (\mathop{\tt{ZNeg}} c)}} \re \mul{c}{(\reify{x})} & & \\
+&\tt{grp}: \set & & \mathop{\reify{((\mathop{\tt{Zpos}} c) * x})} \re \mul{c}{(\reify{x})}  & & \\
+&\el~\tt{grp} \re \bb{G} & & \mathop{\reify{((\mathop{\tt{ZNeg}} c) * x)}} \re \mul{c}{(\reify{x})} & & \\
+& & & \mathop{\reify{(x * (\mathop{\tt{Zpos}} c))}} \re \mul{c}{(\reify{x})}  & & \\
+& & & \mathop{\reify{(x * (\mathop{\tt{ZNeg}} c))}} \re \mul{c}{(\reify{x})} & & \\
 & & & \mathop{\reify{x}} \re \var{1}{x} & &
 \end{align*}
-\caption{Definition of $\bb{G}$  Algebra and its reification ($\reify{}$) and denotation ($\den{}$) functions}
+\caption{Definition of $\bb{G}$  Algebra and its reification ($\reify{}$) and denotation ($\den{}$) functions.}
 \label{fig:grp}
 \end{figure}
 
 \subsection{Associative Commutative Normalization}
 \label{ssec:normalization}
 
+\todo[sm]{In fig.5, we have $\var{x}{c}$, whereas before we had $\var{c}{x}$ -- which one is it? Please be uniform.}
 \begin{figure}
 \begin{align*}
 &\add{\var{x}{c_1}}{\var{x}{c2}} \re \kw{var}~x~(c_1 + c_2) \\
@@ -66,46 +68,52 @@ ensures that expressions involving sums of products are systematically canonical
 &\mul{k}{\opp{x}} \re \mul{(-k)}{x} \\
 &\mul{k}{(\add{x}{y})} \re \add{(\mul{k}{x})}{(\mul{k}{y})} \\
 &\mul{k}{\cst{c}} \re \cst{(k * c)} \\
-&\mul{c_1}{(\mul{c_2}{x})} \re \mul{(c_1 * c_2)}{x} \\
+&\mul{c_1}{(\mul{c_2}{x})} \re \mul{(c_1 * c_2)}{x}
 \end{align*}
 \caption{Rewrite system on canonical forms}
 \label{fig:grp-rw}
 \end{figure}
 
-For \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} symbols, Lambdapi does not use matching modulo AC \cite{matching-mod-AC,kirchner_rsp} as this problem is NP-complete \cite{ac-modulo-np-complete}.
-Instead, Lambdapi transforms sum expression of the form $\add{\var{c_1}{a_1}}{\add{\var{c_2}{a_2}}{\add{\dots}{\var{c_n}{a_n}}}}$ into a canonical form, ensuring that any pair of terms $\var{p}{x}$ and $\var{q}{x}$ involving the same variable $x$ are placed adjacent to each other.
-This order is generalized by Lambdapi for any binary constructor \todo[ac]{Review this phrase}.
-In this way, we will use the rewriting rules $\cref{fig:grp-rw}$ to reduce $\bb{G}$ expressions in canonical form. Notably, the resulting normal forms do not contain the constructors $\tt{mul}$ and $\tt{opp}$, as the associated rewrite rules eliminate them in favor of $\tt{var}, \tt{add}$ and $\tt{cst}$.
+%% sm: not sure if this is important. If you think it is, it should go to the section where AC and canonicalization are introduced.
+%For \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} symbols, Lambdapi does not use matching modulo AC \cite{matching-mod-AC,kirchner_rsp} as this problem is NP-complete \cite{ac-modulo-np-complete}.
+The transformation to canonical form implemented in Lambdapi ensures that sum expressions of the form $\add{\var{c_1}{x_1}}{\add{\var{c_2}{x_2}}{\add{\dots}{\var{c_n}{x_n}}}}$\todo[sm]{Should also allow for constants in these sums.} will be normalized such that any pair of terms $\var{p}{x}$ and $\var{q}{x}$ involving the same variable $x$ are placed next to each other.
+%This order is generalized by Lambdapi for any binary constructor \todo[ac]{Review this phrase}.
+We will use the rewriting rules shown in \cref{fig:grp-rw} for reducing $\bb{G}$ expressions to sum expressions of the form indicated above. Notably, the resulting normal forms do not contain the constructors $\tt{mul}$ and $\tt{opp}$, as the associated rewrite rules eliminate them in favor of $\tt{var}, \tt{add}$ and $\tt{cst}$.
 
-\begin{definition}[AC-canonical form]
-Let $\leq$ be a total order on $\bb{G}$-terms defined as follows:
-Constants are ordered such that $\tt{cst}(c_1) \leq \tt{cst}(c_2) < \var{p}{x}$ for any constants $c_1, c_2$ and any variable term $\var{p}{x}$, with $c_1 \leq c_2$.
+\begin{definition}%[AC-canonical form]
+Let $\leq$ be a total order\todo[sm]{Before you said that the order was built into Lambdapi, now it sounds as if the user could influence the order?} on $\bb{G}$-terms defined as follows:
+Terms are ordered such that $\tt{cst}(c_1) \leq \tt{cst}(c_2) < \var{p}{x}$ for any constants $c_1, c_2$ and any variable term $\var{p}{x}$, with $c_1 \leq c_2$.
 For variable terms, $\var{p}{x} \leq \var{q}{y}$ if either $x < y$, or $x = y$ and $p \leq q$.
 Let $\twoheadrightarrow^{AC}$ be the relation mapping every term t to its unique AC-canonical form denoted $[t]$.
 \end{definition}
 
- Two terms are AC-equivalent iff their AC-canonical forms are equal.
+ Two terms $t$ and $u$ are AC-equivalent (written $t \simeq_{AC} u$) iff their AC-canonical forms are equal.
 
-\begin{definition}[Rewriting modulo AC-canonization]
-Let $\ACcanon = \re_\Sigma\twoheadrightarrow^{AC}$, where $\Sigma$ contains the rewrite rules of \cref{fig:arith-ops,fig:grp-rw}. 
- \end{definition}
+\begin{definition}%[Rewriting modulo AC-canonization]
+The relation $\ACcanon$ is defined as $\re_\Sigma\,\twoheadrightarrow^{AC}$, where $\Sigma$ contains the rewrite rules of \cref{fig:arith-ops,fig:grp-rw}. 
+\end{definition}
 
-An $\ACcanon$ step is a standard $\re_\Sigma$ step with syntactic matching followed by ACcanonization. We now prove that the relation $\ACcanon$ terminates and is confluent.
+An $\ACcanon$ step is a standard $\re_\Sigma$ step with syntactic matching followed by AC-canonicalization. We now prove that the relation $\ACcanon$ terminates and is confluent.
 
-\begin{lemma} The matching modulo AC relation $\rwModAC = \mathop{\simeq_{AC}}\re_\Sigma\mathop{\simeq_{AC}}$, which contains $\ACcanon$, terminates.
-\begin{proof} \upshape{AProVE \cite{aprove}} automatically proves the termination of $\rwModAC$. \end{proof}
+\begin{lemma} 
+	The relation $\mathop{\rwModAC} \mathrel{=} \mathop{\simeq_{AC} \, \re_\Sigma \, \simeq_{AC}}$ of matching modulo AC, which contains $\ACcanon$, terminates.
 \end{lemma}
+\begin{proof} 
+	AProVE \cite{aprove} automatically proves the termination of $\rwModAC$. 
+\end{proof}
 
-\begin{lemma} $\ACcanon$ is locally confluent on AC-canonical.
+
+\begin{lemma} 
+	$\ACcanon$ is locally confluent on AC-canonical terms.
+\end{lemma}
 \begin{proof}
-We show that every critical pair is joinable using $\ACcanon$ and confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
+	We show that every critical pair is joinable using $\ACcanon$ and confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
 % In the following, the terms that are not between square brackets are in AC-canonical form. We also write $[\add{p}{q}]$ to denote either $\add{p}{q}$ or $\add{q}{p}$.
 \end{proof}
-\end{lemma}
 
-To compare two $\bb{Z}$-terms, $t_1$ and $t_2$ wrt $\ACcanon$, the procedure involves reifying them into their corresponding $\bb{G}$-terms, denoted $[g_1]$ and $[g_2]$, using the reification function $\reify{(\_)}$,
-and put in normal forms by $\twoheadrightarrow^{AC}$. Following the reduction rules specified in \cref{fig:grp-rw}, we can then compare their corresponding $\bb{Z}$-terms by applying the denotation function $\den{(\_)}$.
-To validate this procedure, it is necessary to establish the correctness of the following diagram:
+We compare two $\bb{Z}$-terms $t_1$ and $t_2$ wrt $\ACcanon$ by reifying them into their corresponding $\bb{G}$-terms, denoted $[g_1]$ and $[g_2]$, using the reification function $\reify{}$,
+and normalizing them using $\twoheadrightarrow^{AC}$. Following the reduction rules specified in \cref{fig:grp-rw}, we can then compare their corresponding $\bb{Z}$-terms by applying the denotation function $\den{}$.
+To validate this procedure, it is necessary to establish the correctness of the following diagram, formally expressed by \cref{thm:normalization}.\todo[sm]{I don't understand why the arrow from $\bb{Z}$ to $\bb{G}$ has both $\reify{}$ and $\den{}$? Also, the text on the top left is strangely placed.}
 
 \begin{figure}
 \center
@@ -122,20 +130,19 @@ To validate this procedure, it is necessary to establish the correctness of the 
 \end{tikzcd}\]
 \end{figure}
 
-by the correctness theorem:
-
-\begin{theorem}[Normalization correctness]
+\begin{theorem}[Correctness of normalization]\label{thm:normalization}
 For all $\bb{G}$-terms $t$, we have $(\den{[t]}) = (\den{t})$ where $[t]$ is the AC-canonical form of $t$ with respect to $\longrightarrow^{AC}_\Sigma$.
 \end{theorem}
+\todo[sm]{Should explain how this is proved.}
 
 We make use of \cref{lem:conv} to embed $\bb{Z}$-terms into $\bb{G}$ to normalize and subsequent comparison.
 
-\begin{lemma}[Conversion]
+\begin{lemma}[Conversion]\label{lem:conv}
 For all $x: \bb{Z}$, we have $x = (\mathop{\den{(\reify{x})}})$.
-\label{lem:conv}
 \end{lemma}
+\todo[sm]{Proof?}
 
-\begin{example}[Lambdapi proof term for step \tt{t5}]
+\begin{example}[Lambdapi proof term for step \tt{t5}]\todo[sm]{This is incomplete and needs explanation.}
 \begin{lstlisting}[language=Lambdapi,mathescape=true]
 symbol x: El int;
 symbol y: El int;

@@ -21,6 +21,8 @@
 \input{commands}
 \input{listing-config}
 
+\renewcommand{\floatpagefraction}{.99}
+
 \begin{document}
 
 % \title{Verifying SMT-Based Linear Integer Arithmetic in Lambdapi}
@@ -29,16 +31,18 @@
 
 % \titlerunning{Verification of LIA proof with Lambdapi}
 
-\author{Coltellacci Alessio\inst{1}\orcidID{0009-0005-3580-2075}
-% \and
+\author{Alessio Coltellacci\inst{1}\orcidID{0009-0005-3580-2075}
+  \and
+  Stephan Merz\inst{1}\orcidID{0000-0003-0974-1844}
 }
 %
-\authorrunning{Coltellacci A.}
+\authorrunning{A. Coltellacci, S. Merz}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{University of Lorraine, CNRS, Inria, LORIA
-Nancy \email{alessio.coltellacci@inria.fr}}
+\institute{University of Lorraine, CNRS, Inria, LORIA, Nancy 
+%\email{alessio.coltellacci@inria.fr}
+}
 
 % \institute{University of Lorraine, CNRS, Inria, LORIA \and
 % Nancy
@@ -56,7 +60,7 @@ In previous work, the SMT checker Carcara was extended to reconstruct SMT proofs
 supporting the import and export of proofs for integration with other proof assistants such as Rocq, Lean, or HOL-Light.
 Whereas that work was limited to SMT theories without arithmetic, we here present an extension that enables the reconstruction of SMT proofs involving linear integer arithmetic.
 
-\keywords{SMT \and Alethe \and LIA \and Lambdapi \and Normal Form \and Proof By Reflection}\todo[sm]{uniform capitalization}
+\keywords{SMT \and Alethe \and integer arithmetic \and Lambdapi \and normal form \and proof by reflection}
 \end{abstract}
 
 \section{Introduction}
@@ -95,21 +99,23 @@ An empirical evaluation of our approach is provided in \cref{sec:evaluation}. We
 \section{Related work}
 \label{sec:related}
 
-Proof reconstruction for Alethe produced by the veriT solver, has been evaluated within Isabelle/HOL to enhance the reconstruction success rate compared to Z3.
-The authors employed Isabelle’s \emph{linarith} procedure to replay arithmetic reasoning steps. This tactic serves as a decision procedure over real numbers, rather than integers or natural numbers, and is based on Fourier–Motzkin elimination.
-However, the authors note that Isabelle’s arithmetic procedure is incomplete and relatively inefficient for reconstructing arithmetic proofs; consequently, specific rules are reconstructed heuristically to improve performance.
+The reconstruction for Alethe proofs produced by the veriT solver has been implemented within Isabelle/HOL to enhance the reconstruction success rate compared to Z3.
+The authors employed Isabelle's \emph{linarith} procedure to replay arithmetic reasoning steps. This tactic serves as a decision procedure over real numbers, rather than integers or natural numbers, and is based on Fourier-Motzkin elimination.
+However, the authors note that Isabelle's arithmetic procedure is incomplete and relatively inefficient for reconstructing arithmetic proofs; consequently, specific rules are reconstructed heuristically to improve performance.
 
-The work presented in \cite{micromega} proposes a modular framework for integrating SMT solvers with the Coq proof assistant, emphasizing the generation and efficient verification of proof certificates directly within Coq.
-Their approach enables fast, reflexive proof checking using Nelson-Oppen-style theory combination, and it supports both Linear Integer Arithmetic (LIA) and Linear Arithmetic (LA) logics.
-To efficiently generate Farkas certificates for LA, they implement the Simplex algorithm, while for LIA, they adopt a variant of the Omega test \cite{omegatest}.
-Their system has also been evaluated on SMT-LIB 2 benchmarks using the Z3 solver.
+Besson \cite{micromega} introduces a modular framework for integrating SMT solvers with the Coq\todo[sm]{Rocq? used in the abstract} proof assistant, emphasizing the generation and efficient verification of proof certificates directly within Coq.
+His approach enables fast, reflexive proof checking using Nelson-Oppen-style theory combination, and it supports both Linear Integer Arithmetic (LIA) and Linear Arithmetic (LA) logics.
+To efficiently generate Farkas certificates for LA, the technique relies on the Simplex algorithm, while for LIA, a variant of the Omega test \cite{omegatest} is adopted.
+The technique has been evaluated on SMT-LIB 2 benchmarks using the Z3 solver.
+\todo[sm]{I think you need to discuss how performances of the techniques compare, as far as they are comparable.}
 
 
 
-\section{conclusion}
+\section{Conclusion}
 \label{sec:conclusion}
 
 \bibliographystyle{splncs04}
+\todo[sm]{Fix capitalization in references.}
 \bibliography{refs}
 
 \include{appendix}
