@@ -72,12 +72,12 @@
 &\tt{sub} : \bb{P} \ra \bb{P} \ra \bb{Z} \\
 & \tt{sub}~(\tt{I}~p)~(\tt{I}~q) \re \tt{double}~(\tt{sub}~p~q) \\
 & \tt{sub}~(\tt{I}~p)~(\tt{O}~q) \re \tt{succ\_double}~(\tt{sub}~p~q) \\
-& \tt{sub}~(\tt{I}~p)~\tt{H} \re \tt{Zpos}~(\tt{O}~p) \\
+& \tt{sub}~(\tt{I}~p)~\tt{H} \re \ZPos (\tt{O}~p) \\
 & \tt{sub}~(\tt{O}~p)~(\tt{I}~q) \re \tt{pred\_double}~(\tt{sub}~p~q) \\
 & \tt{sub}~(\tt{O}~p)~(\tt{O}~q) \re \tt{double}~(\tt{sub}~p~q) \\
-& \tt{sub}~(\tt{O}~p)~\tt{H} \re \tt{Zpos}~(\tt{pos\_pred\_double}~p) \\
-& \tt{sub}~\tt{H}~(\tt{I}~q) \re \tt{Zneg}~(\tt{O}~q) \\
-& \tt{sub}~\tt{H}~(\tt{O}~q) \re \tt{Zneg}~(\tt{pos\_pred\_double}~q) \\
+& \tt{sub}~(\tt{O}~p)~\tt{H} \re \ZPos (\tt{pos\_pred\_double}~p) \\
+& \tt{sub}~\tt{H}~(\tt{I}~q) \re \ZNeg    (\tt{O}~q) \\
+& \tt{sub}~\tt{H}~(\tt{O}~q) \re \ZNeg    (\tt{pos\_pred\_double}~q) \\
 & \tt{sub}~\tt{H}~\tt{H} \re \tt{Z0} \\
 \end{align*}
 
@@ -96,6 +96,27 @@
 &\tt{compare}~x~y \coloneq \tt{compare\_acc}~x~\tt{Eq}~y \\
 \end{align*}
   
+\begin{minipage}[t]{0.45\textwidth}
+\begin{align*}
+&\tt{mul} : \bb{P} \ra \bb{P} \ra \bb{P} \\
+& \tt{mul}~(\tt{I}~x)~y \re \tt{add}~y~(\tt{O}~(\tt{mul}~x~y)) \\
+& \tt{mul}~(\tt{O}~x)~y \re \tt{O}~(\tt{mul}~x~y) \\
+& \tt{mul}~\tt{H}~y \re y \\
+& \tt{mul}~y~\tt{H} \re y \\
+\end{align*}
+\end{minipage}
+\begin{minipage}[t]{0.48\textwidth}
+\begin{align*}
+&\tt{*} : \bb{Z} \ra \bb{Z} \ra \bb{Z} \\
+& \tt{Z0} *~\_ \re \tt{Z0} \\
+& \_ *~\tt{Z0} \re \tt{Z0} \\
+& \ZPos x *~\ZPos y \re \ZPos (\tt{mul}~x~y) \\
+& \ZPos x *~\ZNeg    y \re \ZNeg    (\tt{mul}~x~y) \\
+& \ZNeg    x *~\ZPos y \re \ZNeg    (\tt{mul}~x~y) \\
+& \ZNeg    x *~\ZNeg    y \re \ZPos (\tt{mul}~x~y) \\
+\end{align*}
+\end{minipage}
+
 \subsection{Confluence of the rewriting rules of integers and positive binary number}
 \label{app:confluence-int-pos}
 

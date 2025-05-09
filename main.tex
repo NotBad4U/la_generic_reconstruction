@@ -103,7 +103,7 @@ The reconstruction for Alethe proofs produced by the veriT solver has been imple
 The authors employed Isabelle's \emph{linarith} procedure to replay arithmetic reasoning steps. This tactic serves as a decision procedure over real numbers, rather than integers or natural numbers, and is based on Fourier-Motzkin elimination.
 However, the authors note that Isabelle's arithmetic procedure is incomplete and relatively inefficient for reconstructing arithmetic proofs; consequently, specific rules are reconstructed heuristically to improve performance.
 
-Besson \cite{micromega} introduces a modular framework for integrating SMT solvers with the Coq\todo[sm]{Rocq? used in the abstract} proof assistant, emphasizing the generation and efficient verification of proof certificates directly within Coq.
+Besson \cite{micromega} introduces a modular framework for integrating SMT solvers with the Rocq proof assistant, emphasizing the generation and efficient verification of proof certificates directly within Coq.
 His approach enables fast, reflexive proof checking using Nelson-Oppen-style theory combination, and it supports both Linear Integer Arithmetic (LIA) and Linear Arithmetic (LA) logics.
 To efficiently generate Farkas certificates for LA, the technique relies on the Simplex algorithm, while for LIA, a variant of the Omega test \cite{omegatest} is adopted.
 The technique has been evaluated on SMT-LIB 2 benchmarks using the Z3 solver.

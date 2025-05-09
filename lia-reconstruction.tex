@@ -34,14 +34,14 @@ ensuring that expressions involving sums of elements of $\bb{G}$ are systematica
 \begin{align*}
 & \bb{G}: \type & & \reify{} : \bb{Z} \ra \bb{G} & & \den{}: \bb{G} \ra \bb{Z} \\
 &|~\add{}{}: \bb{G} \ra \bb{G} \ra \bb{G} & & \reify{\tt{Z0}} \re \cst{\tt{Z0}} & & \den{\cst{c}} \re c \\
-&|~\tt{var}: \bb{Z} \ra \bb{Z} \ra \bb{G} & & \mathop{\reify{\tt{ZPos}}} c \re \cst{c} & & \den{\opp{x}} \mathrel{\re}  \mathop{\sim (\den{x})} \\
-&|~\tt{mul}: \bb{Z} \ra \bb{G} \ra \bb{G} & & \mathop{\reify{\tt{ZNeg}}} c \re \cst{c} & & \den{\mul{c}{x}} \re  c \times (\den{x}) \\
+&|~\tt{var}: \bb{Z} \ra \bb{Z} \ra \bb{G} & & \mathop{\reify{\ZPos}} c \re \cst{(\ZPos c)} & & \den{\opp{x}} \mathrel{\re}  \mathop{\sim (\den{x})} \\
+&|~\tt{mul}: \bb{Z} \ra \bb{G} \ra \bb{G} & & \mathop{\reify{\ZNeg}} c \re \cst{(\ZNeg c)} & & \den{\mul{c}{x}} \re  c \times (\den{x}) \\
 &|~\tt{opp}: \bb{G} \ra \bb{G} & & \reify{(x + y)} \re \add{(\reify{x})}{(\reify{y})} & & \den{\add{x}{y}} \re (\den{x}) + (\den{y}) \\
 &|~\tt{cst}: \bb{Z} \ra \bb{G} & & \reify{(\sim x)} \re \opp{\reify{x}} & & \den{\var{c}{x}} \re  c \times x \\
-&\tt{grp}: \set & & \mathop{\reify{((\mathop{\tt{Zpos}} c) * x})} \re \mul{c}{(\reify{x})}  & & \\
-&\el~\tt{grp} \re \bb{G} & & \mathop{\reify{((\mathop{\tt{ZNeg}} c) * x)}} \re \mul{c}{(\reify{x})} & & \\
-& & & \mathop{\reify{(x * (\mathop{\tt{Zpos}} c))}} \re \mul{c}{(\reify{x})}  & & \\
-& & & \mathop{\reify{(x * (\mathop{\tt{ZNeg}} c))}} \re \mul{c}{(\reify{x})} & & \\
+&\tt{grp}: \set & & \mathop{\reify{((\mathop{\ZPos} c) * x})} \re \mul{c}{(\reify{x})}  & & \\
+&\el~\tt{grp} \re \bb{G} & & \mathop{\reify{((\mathop{\ZNeg} c) * x)}} \re \mul{c}{(\reify{x})} & & \\
+& & & \mathop{\reify{(x * (\mathop{\ZPos} c))}} \re \mul{c}{(\reify{x})}  & & \\
+& & & \mathop{\reify{(x * (\mathop{\ZNeg} c))}} \re \mul{c}{(\reify{x})} & & \\
 & & & \mathop{\reify{x}} \re \var{1}{x} & &
 \end{align*}
 \caption{Definition of $\bb{G}$  Algebra and its reification ($\reify{}$) and denotation ($\den{}$) functions.}
@@ -51,20 +51,19 @@ ensuring that expressions involving sums of elements of $\bb{G}$ are systematica
 \subsection{Associative Commutative Normalization}
 \label{ssec:normalization}
 
-\todo[sm]{In fig.5, we have $\var{x}{c}$, whereas before we had $\var{c}{x}$ -- which one is it? Please be uniform.}
 \begin{figure}
 \begin{align*}
-&\add{\var{x}{c_1}}{\var{x}{c2}} \re \kw{var}~x~(c_1 + c_2) \\
-&\add{\var{x}{c_1}}{(\add{\var{x}{c_2}}{y})} \re \add{\var{x}{(c_1 + c_2)}}{y} \\
+&\add{\var{c_1}{x}}{\var{c_2}{x}} \re \var{(c_1 + c_2)}{x} \\
+&\add{\var{c_1}{x}}{(\add{\var{c_2}{x}}{y})} \re \add{\var{(c_1 + c_2)}{x}}{y} \\
 &\add{\cst{c_1}}{\cst{c_2}} \re \cst{c_1 + c_2} \\
 &\add{\cst{c_1}}{(\add{\cst{c_2}}{y})} \re \add{\cst{c_1 + c_2}}{y} \\
 &\add{\cst{0}}{x} \re x \\
 &\add{x}{\cst{0}} \re x \\
-&\opp{\var{x}{c}} \re \var{x}{(-c)} \\
+&\opp{\var{c}{x}} \re \var{(-c)}{x} \\
 &\opp{\cst{c}} \re \cst{(-c)} \\
 &\opp{\opp{x}} \re x \\
 &\opp{\add{x}{y}} \re \add{(\opp{x})}{(\opp{y})} \\
-&\mul{k}{\var{x}{c}} \re \var{x}{(k * c)} \\
+&\mul{k}{\var{c}{x}} \re \var{(k * c)}{x} \\
 &\mul{k}{\opp{x}} \re \mul{(-k)}{x} \\
 &\mul{k}{(\add{x}{y})} \re \add{(\mul{k}{x})}{(\mul{k}{y})} \\
 &\mul{k}{\cst{c}} \re \cst{(k * c)} \\
@@ -76,12 +75,12 @@ ensuring that expressions involving sums of elements of $\bb{G}$ are systematica
 
 %% sm: not sure if this is important. If you think it is, it should go to the section where AC and canonicalization are introduced.
 %For \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} symbols, Lambdapi does not use matching modulo AC \cite{matching-mod-AC,kirchner_rsp} as this problem is NP-complete \cite{ac-modulo-np-complete}.
-The transformation to canonical form implemented in Lambdapi ensures that sum expressions of the form $\add{\var{c_1}{x_1}}{\add{\var{c_2}{x_2}}{\add{\dots}{\var{c_n}{x_n}}}}$\todo[sm]{Should also allow for constants in these sums.} will be normalized such that any pair of terms $\var{p}{x}$ and $\var{q}{x}$ involving the same variable $x$ are placed next to each other.
-%This order is generalized by Lambdapi for any binary constructor \todo[ac]{Review this phrase}.
+The transformation to canonical form implemented in Lambdapi ensures that sum expressions of the form $\var{c_1}{x_1} \oplus \cst{k_1} \oplus \var{c_2}{x_2} \oplus \dots \oplus \cst{k_m} \oplus \dots \oplus \var{c_n}{x_n}$ will be normalized such that any pair of terms $\var{p}{x}$ and $\var{q}{x}$ involving the same variable $x$ are placed next to each other,
+and all $\cst{k_i}$ will be placed at the left before the first variable $\var{c_j}{x_j}$.
 We will use the rewriting rules shown in \cref{fig:grp-rw} for reducing $\bb{G}$ expressions to sum expressions of the form indicated above. Notably, the resulting normal forms do not contain the constructors $\tt{mul}$ and $\tt{opp}$, as the associated rewrite rules eliminate them in favor of $\tt{var}, \tt{add}$ and $\tt{cst}$.
 
 \begin{definition}%[AC-canonical form]
-Let $\leq$ be a total order\todo[sm]{Before you said that the order was built into Lambdapi, now it sounds as if the user could influence the order?} on $\bb{G}$-terms defined as follows:
+The $\leq$ builtin total order on $\bb{G}$-terms is defined as follows:
 Terms are ordered such that $\tt{cst}(c_1) \leq \tt{cst}(c_2) < \var{p}{x}$ for any constants $c_1, c_2$ and any variable term $\var{p}{x}$, with $c_1 \leq c_2$.
 For variable terms, $\var{p}{x} \leq \var{q}{y}$ if either $x < y$, or $x = y$ and $p \leq q$.
 Let $\twoheadrightarrow^{AC}$ be the relation mapping every term t to its unique AC-canonical form denoted $[t]$.
