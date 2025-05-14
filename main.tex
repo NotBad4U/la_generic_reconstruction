@@ -119,11 +119,11 @@ Nevertheless, our framework offers the advantage of supporting proof export from
 \label{sec:conclusion}
 
 We presented an extension of Carcara's \cite{carcara} translation module \cite{ColtellacciMD24} for reconstructing arithmetic reasoning steps in Alethe proof traces involving the \tt{LIA} theory in the foundational proof assistant Lambdapi \cite{lambdapi}.
-Our method includes a ring solver inspired by the computational reflection techniques described in \cite{ring-Boutin,RingRight}.
+Our method includes a ring solver inspired by the computational reflection techniques described in \cite{reflection-origin-coq,ring-coq}.
 
-We have shown that this allows us to reconstruct several thousands of SMT proofs that originate from the SMT-lib Benchmarks.
-Nonetheless, the current implementation does not scale well in arithmetic heavy cases.
-As future work, we plan to improve Lambdapi’s builtin normalization mechanism.
+We have shown that this allows us to reconstruct several thousand SMT proofs that originate from the SMT-lib Benchmarks.
+Nonetheless, the current implementation does not scale well in arithmetic-heavy cases.
+As future work, we plan to improve Lambdapi’s built-in normalization mechanism to better handle such cases.
 We also intend to extend our work to support rational and real arithmetic, enabling verification of broader fragments of linear arithmetic (\texttt{LA}) theories.
 
 \bibliographystyle{splncs04}
