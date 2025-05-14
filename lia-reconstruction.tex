@@ -29,7 +29,7 @@ Lambdapi provides the modifiers \lstinline[language=Lambdapi,basicstyle=\ttfamil
 ensuring that terms are systematically transformed into a canonical form w.r.t.\ a builtin ordering relation, as described in \cite{univAC,ACorigin}. We declare the operator $\add{}{}$ as \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative},
 ensuring that expressions involving sums of elements of $\bb{G}$ are systematically canonicalized. In particular, terms of the form $\tt{var}~c~x$ for equal variables will be placed next to each other, facilitating simplification.
 
-\todo[sm]{Fig.4: Multiplication $*$ on $\bb{Z}$ was not introduced before. Also, is $*$ (used in $\reify{}$) the same as $\times$ (used in $\den{}$)? In the reification rules for multiplication, I don't understand why \tt{Zpos} and \tt{Zneg} are handled in the same way, i.e. the sign is forgotten? As it stands, the definition is not even type-correct. And in fact, why not just transform $c * x$ to $\tt{var}~c~x$?}
+\todo[ac]{check if $\reify{}$ can not be optimised}
 \begin{figure}
 \begin{align*}
 & \bb{G}: \type & & \reify{} : \bb{Z} \ra \bb{G} & & \den{}: \bb{G} \ra \bb{Z} \\
