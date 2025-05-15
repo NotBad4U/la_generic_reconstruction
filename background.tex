@@ -51,31 +51,9 @@ The Alethe proof trace format \cite{alethespec} for SMT solvers comprises two pa
 They are sequences $a_1 \dots a_m~t_1 \dots t_n$ where the assumptions $a_i$ correspond to the constraints of the original SMT problem being refuted, each $t_i$ is a clause inferred from previous elements of the sequence, and $t_n$ is $\bot$ (the empty clause).
 In the following, we designate the SMT-LIB problem as the \emph{input problem}.
 
-\begin{lstlisting}[language=SMT,label={lst:smtexampleinput},caption={Input problem.}]
-(set-logic QF_LIA)
-(declare-const x Int)
-(declare-const y Int)
-(assert (= 0 y))
-(assert (= x 2))
-(assert (or (< (+ x y) 1) (< 3 x)))
-(get-proof)
-\end{lstlisting}
+\lstinputlisting[language=SMT,label={lst:smtexampleinput},caption={Input problem.}]{example_lia.smt2}
 
-% \begin{center}
-% \lightning\todo[sm]{I suggest removing this.}
-% \end{center}
-
-\begin{lstlisting}[language=SMT,caption={Proof of unsatisfiability of the input problem of \protect{\cref{lst:smtexampleinput}}.},label={lst:smtexampleproof}]
-(assume a0 (or (< (+ x y) 1) (< 3 x)))
-(assume a1 (= x 2))
-(assume a2 (= 0 y))
-(step t1 (cl (< (+ x y) 1) (< 3 x)) :rule or :premises (a0))
-(step t2 (cl (not (< 3 x)) (not (= x 2))) :rule la_generic :args (1/1 1/1))
-(step t3 (cl (not (< 3 x))) :rule resolution :premises (a1 t2))
-(step t4 (cl (< (+ x y) 1)) :rule resolution :premises (t1 t3))
-(step t5 (cl (not (< (+ x y) 1)) (not (= x 2)) (not (= 0 y))) :rule la_generic :args (1/1 -1/1 1/1))
-(step t6 (cl) :rule resolution :premises (t5 t4 a1 a2))
-\end{lstlisting}
+\lstinputlisting[language=SMT,caption={Proof of unsatisfiability of the input problem of \protect{\cref{lst:smtexampleinput}}.},label={lst:smtexampleproof}]{proof_lia.alethe}
 
 We will use the input problem shown in \cref{lst:smtexampleinput} with its Alethe proof (found by cvc5) in \cref{lst:smtexampleproof} as a running example to provide an overview of Alethe concepts and to illustrate our reconstruction of linear arithmetic step in Lambdapi.
 
