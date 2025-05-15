@@ -67,17 +67,17 @@ Whereas that work was limited to SMT theories without arithmetic, we here presen
 \section{Introduction}
 
 SMT solvers have become capable of producing proofs of unsatisfiability,  enabling independent verification of correctness without relying on the solver's implementation.
-This development addresses the growing need for trustworthy verification in safety-critical applications and SMT solver usage in proof assistant, where the solver cannot be assumed to be fully trusted.
+This development addresses the growing need for trustworthy verification in safety-critical applications and for using SMT solvers as backends of skeptical proof assistants that do not trust the solver.
 Alethe \cite{alethe,alethespec} is an established SMT proof format supported by the solvers cvc5 and veriT. In our previous work \cite{ColtellacciMD24}, we extended the Alethe proof checker and elaborator Carcara \cite{carcara} to
 reconstruct Alethe SMT proofs within the Lambdapi proof assistant, thereby ensuring their validity.
 Lambdapi \cite{lambdapi} is a proof assistant based on the $\lambda\Pi$-calculus modulo rewriting \cite{lpmodulo}, a logical framework \cite{lf} that extends the $\lambda$-calculus with dependent types and user-defined rewrite rules.
 This foundation allows Lambdapi to serve as a framework for formalizing various logical systems.
 Designed with interoperability in mind, Lambdapi can import and export proofs, facilitating integration with other proof assistants \cite{LPAR2024:Translating_HOL_Light_proofs} such as Rocq \cite{Rocq-refman}, Lean \cite{lean4:2021}, and HOL-Light. 
 
-However, our prior work was limited to proofs expressed within the logic of Uninterpreted Functions (UF) and Quantifier-Free (QF), as well as their subtheories. 
+However, our prior work was limited to proofs expressed within the logic of Uninterpreted Functions (UF) and Quantifier-Free (QF), as well as their subtheories.\todo[sm]{What does this mean? If it's QF\_UF, it should be written like that, but then there is no sub-theory.} 
 In the present work, we extend this approach to support the reconstruction of proof steps involving linear integer arithmetic (LIA).
-When the propositional model is unsatisfiable in the theory of linear (integer) arithmetic, the solver creates a proof certificate.
-The conclusion is a tautological clause of linear inequalities and equations and the justification of the step is a list of coefficients so that the linear combination becomes a trivially contradictory inequality after simplification (e.g., $0 \geq 1$).
+When the propositional model is unsatisfiable\todo[sm]{Doesn't make any sense.} in the theory of linear (integer) arithmetic, the solver creates a proof certificate.
+The conclusion\todo[sm]{Conclusion of what?} is a tautological clause of linear inequalities and equations and the justification of the step is a list of coefficients so that the linear combination becomes a trivially contradictory inequality after simplification (e.g., $0 \geq 1$).\todo[sm]{This covers la\_generic, but there is more to LIA.}
 To verify these certificates, we implemented an automatic decision procedure based on proof by reflection \cite{reflection-origin-coq,ring-coq}.
 % Most SMT solvers, including cvc5 and veriT, use the simplex method \cite{SRI:simplex:dpllt} to handle linear arithmetic.\todo[sm]{Is that relevant for proof checking?}
 
@@ -111,7 +111,7 @@ To efficiently generate Farkas certificates for LA, the technique relies on the 
 The technique has been evaluated on SMT-LIB 2 benchmarks using the Z3 solver.
 
 Compared to these approaches, which demonstrate stronger scalability in handling larger and more complex systems of inequalities, our method does not scale as well in certain arithmetic heavy cases.
-As shown in \cref{sec:evaluation}, performance degrades on benchmarks such as \emph{rings}, where large \tt{la\_generic} are involved.
+As shown in \cref{sec:evaluation}, performance degrades on benchmarks such as \emph{rings}, where large instances of rule \tt{la\_generic} are generated.
 Nevertheless, our framework offers the advantage of supporting proof export from Lambdapi to other systems. This interoperability enables the reuse of valid SMT proofs in external environments such as Rocq.
 
 

@@ -19,7 +19,7 @@ such that it can be reduced to a constant because variables will cancel each oth
 
 The procedure is based on an algebraic group structure, denoted as  $\bb{G}$ defined in \cref{fig:grp}, which represents linear polynomials.
 The base type for this group's elements is $\bb{G}: \type$. The unary operator $\tt{cst}$ injects constants from $\bb{Z}$ into $\bb{G}$.
-The term $\tt{var}~c~x$ is intended for representing expressions $c \times x$ where $c$ is an integer coefficient and $x$ a $\bb{Z}$ term, in particular a variable, that appear as constituents of linear inequalities.
+The term $\tt{var}~c~x$ is intended for representing expressions $c \times x$ that appear as constituents of linear inequalities, where $c$ is an integer coefficient and $x$ a $\bb{Z}$ term, in particular a variable.
 %The $\tt{var}$ constructor represents a ``catch-all'' case for subexpressions that we cannot model. These subexpressions correspond to actual variables in $\bb{Z}$.
 %This constructor takes two arguments — both in $\bb{Z}$ — where the first denotes a constant coefficient and the second a variable identifier; further justification for this design will be provided later.
 The constructor $\tt{mul}$  represents the multiplication of an element of $\bb{G}$ by a constant. The constructor $\tt{opp}$ corresponds to unary minus.
@@ -61,10 +61,10 @@ ensuring that expressions involving sums of elements of $\bb{G}$ are systematica
 &\add{x}{\cst{0}} \re x \\
 &\opp{\var{c}{x}} \re \var{(-c)}{x} \\
 &\opp{\cst{c}} \re \cst{(-c)} \\
-&\opp{\opp{x}} \re x \\
+&\opp{(\opp{x})} \re x \\
 &\opp{\add{x}{y}} \re \add{(\opp{x})}{(\opp{y})} \\
 &\mul{k}{\var{c}{x}} \re \var{(k * c)}{x} \\
-&\mul{k}{\opp{x}} \re \mul{(-k)}{x} \\
+&\mul{k}{(\opp{x})} \re \mul{(-k)}{x} \\
 &\mul{k}{(\add{x}{y})} \re \add{(\mul{k}{x})}{(\mul{k}{y})} \\
 &\mul{k}{\cst{c}} \re \cst{(k * c)} \\
 &\mul{c_1}{(\mul{c_2}{x})} \re \mul{(c_1 * c_2)}{x}
