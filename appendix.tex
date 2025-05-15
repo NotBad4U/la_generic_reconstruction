@@ -236,8 +236,6 @@ These rules can be used to rerun the tool in order to verify the confluence prop
 
 
 % Critical pair diagram
-\section{Proofs of Normalization Lemmas}
-
 
 \begin{lemma}[Confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$]
 \begin{proof}
@@ -249,6 +247,7 @@ CSI automatically proves the confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$ by givi
 \label{lemma:confluenceZP}
 \end{lemma}
 
+\section{Proofs of Normalization Lemmas}
 
 \begin{lemma} 
 	$\ACcanon$ is locally confluent on AC-canonical terms.
@@ -393,9 +392,27 @@ both reduce to the same expression due to the confluence property of $\ra_\bb{Z}
 Finally, we have $\mul{(c_1)}{(\mul{(c_2 * l)}{z})} \MRAC \mul{((c_1 * c_2) * c_3)}{z})$
 and $\mul{(c_1 * c_2)}{(\mul{c_3}{z}}) \MRAC \mul{(c_1 * (c_2 * c_3))}{z})$ that converge by the confluence of $\ra_\bb{Z}$.
 
-\section{Example}
+\section{Translation example}
 \label{app:example-translation}
 
-We present here the proof \cref{lst:smtexampleproof} translated with our module added to Carcara.
+We present in \cref{lst:translation-example} the proof translated using our module integrated into Carcara.
+Our focus is on the translation of the $\tt{la\_generic}$ rule applied in steps \tt{t2} and \tt{t5}.
+The proof for \tt{t2} begins at line 28, while the proof for \tt{t5} starts at line 92.
+In what follows, we detail only the translation of step \tt{t2}; the translation of \tt{t5} proceeds analogously.
 
-\lstinputlisting[language=Lambdapi,mathescape=true,caption={Lambdapi proof of \cref{lst:smtexampleproof}}]{lp_example.lp}
+The proof script from lines 29 to 59 corresponds to the algorithm described in \cref{sssect:la-in-alethe}.
+The step \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|rewrite Zinv_lt_eq| at line 32 reflects the normalization procedure in Step 1, where the lemma rewrites $\neg (3 < x)$ as $\neg (\sim 3 > \sim x)$.
+
+The lemmas \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Z_diff_gt_Z0| and \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Z_diff_eq_Z0_eq|,
+used at lines 33–34, implement Step 2 by rewriting expressions such as $\neg (x = 2)$ into $\neg (x - 2 = 0)$, bringing all terms to one side.
+Since the goal involves a $>$ inequality, we can apply Step 3 that strengthen it using the lemma \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Zgt_le_succ_r_eq|,
+which rewrites $\neg (\sim 3 + x > 0)$ into $\neg (\sim 3 + x \geq 1)$, acknowledging that $x$ is of type \tt{Int}, i.e., $\bb{Z}$.
+
+The coefficients involved in step \tt{t2}, namely $[\frac{1}{1}, -\frac{1}{1}]$, are trivially cast into $\bb{Z}$ in Step 4,
+resulting in $[1, -1]$. Lines 36 and 37 illustrate the application of these coefficients to their respective inequalities via the appropriate lemma.
+
+Finally, the contradiction derived in Step 6 is constructed by summing the inequalities from lines 47 to 52.
+This is facilitated by \cref{lem:conv}, which reifies the sum of the inequalities into $\bb{G}$, and by \cref{thm:normalization} with $\RAC$,
+which derives the contradiction, allowing us to conclude the proof at line 58.
+
+\lstinputlisting[language=Lambdapi,mathescape=true,label={lst:translation-example},caption={Lambdapi proof of \cref{lst:smtexampleproof}}]{lp_example.lp}
