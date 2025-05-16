@@ -34,6 +34,7 @@ We have also defined the operations of multiplication ($\mathbin{*}$) and subtra
 The function $\texttt{cmp}: \bb{P} \to \bb{P} \to \texttt{Comp}$ performs a comparison between two binary positive numbers. 
 These operators are defined by rewriting rules that we will refer to as $\ra_\bb{Z}$ and $\ra_\bb{P}$ (for operations on $\bb{Z}$ and $\bb{P}$) in the following sections.
 The confluence of these rewriting rules has been proven using CSI \cite{CSI}. A detailed proof of confluence can be found in \cref{app:confluence-int-pos}.
+In addition, we leverage these rewriting rules to perform the constant folding required by the \texttt{evaluate} rule, enabling the final proof step to be discharged by reflexivity.
 
 \begin{figure}
 \centering

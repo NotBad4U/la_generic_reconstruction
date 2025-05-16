@@ -410,6 +410,7 @@ which rewrites $\neg (\sim 3 + x > 0)$ into $\neg (\sim 3 + x \geq 1)$, acknowle
 
 The coefficients involved in step \tt{t2}, namely $[\frac{1}{1}, -\frac{1}{1}]$, are trivially cast into $\bb{Z}$ in Step 4,
 resulting in $[1, -1]$. Lines 36 and 37 illustrate the application of these coefficients to their respective inequalities via the appropriate lemma.
+\todo[ac]{explain Z\_eq\_implies\_ge}
 
 Finally, the contradiction derived in Step 6 is constructed by summing the inequalities from lines 47 to 52.
 This is facilitated by \cref{lem:conv}, which reifies the sum of the inequalities into $\bb{G}$, and by \cref{thm:normalization} with $\RAC$,

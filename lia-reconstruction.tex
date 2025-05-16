@@ -20,8 +20,6 @@ such that it can be reduced to a constant because variables will cancel each oth
 The procedure is based on an algebraic group structure, denoted as  $\bb{G}$ defined in \cref{fig:grp}, which represents linear polynomials.
 The base type for this group's elements is $\bb{G}: \type$. The unary operator $\tt{cst}$ injects constants from $\bb{Z}$ into $\bb{G}$.
 The term $\tt{var}~c~x$ is intended for representing expressions $c \times x$ that appear as constituents of linear inequalities, where $c$ is an integer coefficient and $x$ a $\bb{Z}$ term, in particular a variable.
-%The $\tt{var}$ constructor represents a ``catch-all'' case for subexpressions that we cannot model. These subexpressions correspond to actual variables in $\bb{Z}$.
-%This constructor takes two arguments — both in $\bb{Z}$ — where the first denotes a constant coefficient and the second a variable identifier; further justification for this design will be provided later.
 The constructor $\tt{mul}$  represents the multiplication of an element of $\bb{G}$ by a constant. The constructor $\tt{opp}$ corresponds to unary minus.
 Lastly, the constructor $\add{}{}$ represents the addition between two elements of $\bb{G}$.
 
@@ -168,3 +166,4 @@ Hence, $x = (\mathop{\den{(\reify{x})}})$ in all cases.
 \end{proof}
 
 The full proof \cref{lst:smtexampleproof} translated into Lambdapi can be found in \cref{app:example-translation}.
+In addition, we leverage this normalization process to support the \tt{arith-poly-norm} rule.
