@@ -264,7 +264,7 @@ We use the notation $\MRAC$ to denote a multistep rewriting with AC-canonical fo
 \begin{center}
 \cp
 {
-  \opp{\underline{\var{c_1}{x} \oplus \var{c_2}{x}}}
+  \opp{(\underline{\var{c_1}{x} \oplus \var{c_2}{x}})}
 }
 {
   \opp{\var{c_1}{x}} \oplus \opp{\var{c_2}{x}}
@@ -291,7 +291,7 @@ and $\opp{\var{(c_1 + c_2)}{x}} \MRAC \var{\sim (c_1 + c_2)}{x}$ converge by the
   \opp{\var{c_1}{x}} \oplus \opp{(\var{c_2}{x} \oplus y)}
 }
 {
-  \opp{\var{(c_1 + c_2)}{x} \oplus y}
+  \opp{\var{(c_1 + c_2)}{x} \oplus y)}
 }
 {11}{3}
 
@@ -305,7 +305,7 @@ both reduce to the same term, as guaranteed by the confluence of $\ra_\bb{Z}$.
 % t ↪[1] opp (cst ($0 + $1)) ↪* cst (— ($0 + $1))
 %   with add (cst $k) (cst $l) ↪ cst ($0 + $1)
 \cp{
-  \opp{\underline{\cst{c_1} \oplus \cst{c_2}}}
+  \opp{(\underline{\cst{c_1} \oplus \cst{c_2}})}
 }
 {
   \opp{\cst{c_1}} \oplus \opp{\cst{c_2}}
@@ -326,7 +326,7 @@ and $\opp{\cst{(c_1 + c_2)}} \MRAC \cst{\sim (c_1 + c_2)}$ reduce to the same re
 %   with add (cst $k) (add (cst $l) $y) ↪ add (cst ($0 + $1)) $2
 \cp
 {
-  \opp{\underline{\cst{c_1} \oplus (\cst{c_2} \oplus y)}}
+  \opp{(\underline{\cst{c_1} \oplus (\cst{c_2} \oplus y)})}
 }
 {
   \opp{\cst{c_1}} \oplus \opp{(\cst{c_2} \oplus y)}
