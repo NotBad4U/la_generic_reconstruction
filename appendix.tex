@@ -397,25 +397,25 @@ and $\mul{(c_1 * c_2)}{(\mul{c_3}{z}}) \MRAC \mul{(c_1 * (c_2 * c_3))}{z})$ that
 
 We present in \cref{lst:translation-example} the proof translated using our module integrated into Carcara.
 Our focus is on the translation of the $\tt{la\_generic}$ rule applied in steps \tt{t2} and \tt{t5}.
-The proof for \tt{t2} begins at line 28, while the proof for \tt{t5} starts at line 92.
+The proof for \tt{t2} begins at line 37, while the proof for \tt{t5} starts at line 104.
 In what follows, we detail only the translation of step \tt{t2}; the translation of \tt{t5} proceeds analogously.
 
-The proof script from lines 29 to 59 corresponds to the algorithm described in \cref{sssect:la-in-alethe}.
-The step \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|rewrite Zinv_lt_eq| at line 32 reflects the normalization procedure in Step 1, where the lemma rewrites $\neg (3 < x)$ as $\neg (\sim 3 > \sim x)$.
+The proof script from lines 37 to 69 corresponds to the algorithm described in \cref{sssect:la-in-alethe}.
+The step \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|rewrite Zinv_lt_eq| at line 41 reflects the normalization procedure in Step 1, where the lemma rewrites $\neg (3 < x)$ as $\neg (\sim 3 > \sim x)$.
 
 The lemmas \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Z_diff_gt_Z0| and \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Z_diff_eq_Z0_eq|,
-used at lines 33–34, implement Step 2 by rewriting expressions such as $\neg (x = 2)$ into $\neg (x - 2 = 0)$, bringing all terms to one side.
-Since the goal involves a $>$ inequality, we can apply Step 3 that strengthen it using the lemma \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Zgt_le_succ_r_eq|,
+used at lines 42–43, implement Step 2 by rewriting expressions such as $\neg (x = 2)$ into $\neg (x - 2 = 0)$, bringing all terms to one side.
+Since the goal involves a $>$ inequality, we can apply Step 3 that strengthen it using the lemma \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Zgt_le_succ_r_eq| at line 44,
 which rewrites $\neg (\sim 3 + x > 0)$ into $\neg (\sim 3 + x \geq 1)$, acknowledging that $x$ is of type \tt{Int}, i.e., $\bb{Z}$.
 
 The coefficients involved in step \tt{t2}, namely $[\frac{1}{1}, -\frac{1}{1}]$, are trivially cast into $\bb{Z}$ in Step 4,
-resulting in $[1, -1]$. Lines 36 and 37 illustrate the application of these coefficients to their respective inequalities via the appropriate lemma.
+resulting in $[1, -1]$. Lines 45 and 46 illustrate the application of these coefficients to their respective inequalities via the appropriate lemma.
 
 To ensure that all inequalities are expressed using only the symbols $\geq$ (or $>$) we rewrites the remaining equalities as inequalities of the form $\geq$ using the lemma \tt{Z\_eq\_implies\_ge} ($x = y$ implies $ x \geq y$),
-as illustrated at line 47.
+as illustrated at line 56.
 
-Finally, the contradiction derived in Step 6 is constructed by summing the inequalities from lines 47 to 52.
+Finally, the contradiction derived in Step 6 is constructed by summing the inequalities from lines 57 to 65.
 This is facilitated by \cref{lem:conv}, which reifies the sum of the inequalities into $\bb{G}$, and by \cref{thm:normalization} with $\RAC$,
-which derives the contradiction, allowing us to conclude the proof at line 58.
+which derives the contradiction, allowing us to conclude the proof at line 69.
 
 \lstinputlisting[language=Lambdapi,mathescape=true,label={lst:translation-example},caption={Lambdapi proof of \cref{lst:smtexampleproof}}]{lp_example.lp}

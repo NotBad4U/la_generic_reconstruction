@@ -21,6 +21,7 @@ symbol p_7 ≔ (0 = y);
 symbol p_9 ≔ (3 < x);
 symbol p_10 ≔ (¬ (3 < x));
 
+// assume steps
 symbol a0 : $\pid$ ((p_2 ∨ᶜ (3 < x)) ⟇ ▩);
 
 symbol a1 : $\pid$ (p_5 ⟇ ▩);
@@ -53,13 +54,15 @@ have Hla : $\pid$ ((¬ (3 < x) ∨ᶜ ¬ (x = 2)) ⟇ ▩) {
     set H1l' ≔ ((— 1) * (x - 2));
     set H1r' ≔ ((— 1) * 0);
     have H1': $\pic$ (H1l' ≥ H1r') { refine Z_eq_implies_ge H1 }; remove H1;
-    have contra : $\pic$ ((⇓ (⇑ (H0l' + H1l'))) ≥ (⇓ (⇑ (H0r' + H1r')))) {
+    have contra : $\pic$ (
+        (⇓ (⇑ (H0l' + H1l'))) ≥ (⇓ (⇑ (H0r' + H1r')))
+    ){
         rewrite ⇓_⇑;
         rewrite ⇓_⇑;
         apply (Zsum_geq_s H0l' H0r' H1l' H1r' H0 H1');
     };
     apply (⇒ᶜₑ' contra);
-    apply trivial;
+    apply ⊤ᶜᵢ;
 };
 simplify;
 rewrite or_identity_r;
@@ -70,15 +73,14 @@ end;
 opaque symbol t3 : $\pid$ (p_10 ⟇ ▩) ≔ 
 begin
 have a1_t2 : $\pid$ (p_10 ⟇ ▩) {
-    have t2_perm : $\pic$ ((⟇_to_∨ᶜ_rw (¬ (3 < x)  ⟇ ¬ (x = 2) ⟇ ▩)) = (⟇_to_∨ᶜ_rw (¬ (x = 2)
-             ⟇ ¬ (3 < x)
-            ⟇ ▩))) {
-        apply (cl_perm_correct (¬ (3 < x)  ⟇ ¬ (x = 2) ⟇ ▩) (¬ (x = 2)  ⟇ ¬ (3 < x) ⟇ ▩));
-        apply trivial;
+    have t2_perm : $\pic$ (
+        (⟇_to_∨ᶜ_rw (¬ (3 < x)  ⟇ ¬ (x = 2) ⟇ ▩)) = (⟇_to_∨ᶜ_rw (¬ (x = 2)
+        ⟇ ¬ (3 < x)
+        ⟇ ▩))) {
+        apply cl_perm_correct;
+        apply ⊤ᶜᵢ;
     };
-    apply resolutionₗ a1 (subst_equiv_clause (¬ (3 < x)  ⟇ ¬ (x = 2) ⟇ ▩) (¬ (x = 2)
-         ⟇ (¬ (3 < x))
-        ⟇ ▩) t2_perm t2);
+    apply resolutionₗ a1 (subst_equiv_clause t2_perm t2);
 };
 refine a1_t2;
 end;
@@ -86,13 +88,15 @@ end;
 opaque symbol t4 : $\pid$ (p_2 ⟇ ▩) ≔ 
 begin
 have t1_t3 : $\pid$ (p_2 ⟇ ▩) {
-    have t1_perm : $\pic$ ((⟇_to_∨ᶜ_rw ((x + y < 1)  ⟇ (3 < x) ⟇ ▩)) = (⟇_to_∨ᶜ_rw ((3 < x)  ⟇ (x + y < 1) ⟇ ▩))) {
-        apply (cl_perm_correct ((x + y < 1)  ⟇ (3 < x) ⟇ ▩) ((3 < x)  ⟇ (x + y < 1) ⟇ ▩));
-        apply trivial;
+    have t1_perm : $\pic$ (
+        (⟇_to_∨ᶜ_rw ((x + y < 1)  ⟇ (3 < x) ⟇ ▩))
+        =
+        (⟇_to_∨ᶜ_rw ((3 < x)  ⟇ (x + y < 1) ⟇ ▩))
+    ) {
+        apply cl_perm_correct;
+        apply ⊤ᶜᵢ;
     };
-    apply resolutionₗ (subst_equiv_clause ((x + y < 1)  ⟇ (3 < x) ⟇ ▩) ((3 < x)
-         ⟇ (x + y < 1)
-        ⟇ ▩) t1_perm t1) t3;
+    apply resolutionₗ (subst_equiv_clause t1_perm t1) t3;
 };
 refine t1_t3;
 end;
@@ -125,13 +129,17 @@ have Hla : $\pid$ ((¬ (x + y < 1) ∨ᶜ ¬ (x = 2) ∨ᶜ ¬ ((0 = y))) ⟇ �
     set H2r' ≔ ((— 1) * 0);
     have H1': $\pic$ (H1l' ≥  H1r') { refine Z_eq_implies_ge H1 }; remove H1;
     have H2': $\pic$ (H2l' ≥  H2r') { refine Z_eq_implies_ge H2 }; remove H2;
-    have contra : $\pic$ ((⇓ (⇑ (H0l' + H1l' + H2l'))) ≥ (⇓ (⇑ (H0r' + H1r' + H2r')))) {
+    have contra : $\pic$ (
+        (⇓ (⇑ (H0l' + H1l' + H2l'))) ≥ (⇓ (⇑ (H0r' + H1r' + H2r')))
+    ) {
         rewrite ⇓_⇑;
         rewrite ⇓_⇑;
-        apply (Zsum_geq_s H0l' H0r' (H1l' + H2l') (H1r' + H2r') H0 (Zsum_geq_s H1l' H1r' H2l' H2r' H1' H2'));
+        apply  Zsum_geq_s
+            H0l' H0r' (H1l' + H2l') (H1r' + H2r') H0
+            (Zsum_geq_s H1l' H1r' H2l' H2r' H1' H2');
     };
     apply (⇒ᶜₑ' contra);
-    apply trivial;
+    apply ⊤ᶜᵢ;
 };
 simplify;
 rewrite or_identity_r;
