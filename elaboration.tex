@@ -11,7 +11,8 @@ To address this, Carcara leverages an external tool that reformulates each \tt{l
 The proof is then imported and validated, replacing the original step. 
 %% sm: I don't see why this remark is relevant for this paper?
 %However, at present, Carcara only uses the solver cvc5 for performing this task.
-In detail, the elaboration method, when encountering a \tt{lia\_generic} step 
+Thus, the step
+% In detail, the elaboration method, when encountering a \tt{lia\_generic} step 
 %
 \begin{lstlisting}[language=SMT]
     (step S (cl (not l1) ... (not ln)) :rule lia_generic)

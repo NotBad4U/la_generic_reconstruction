@@ -1,7 +1,7 @@
 \section{Reconstruction of linear arithmetic for LIA logic}
 \label{sec:lia-reconstruction}
 
-Proof by reflection is a technique for writing certified procedures for automated reasoning. It reduces the validity of a logical statement to a symbolic computation.
+Proof by reflection \cite{reflection-origin-coq} is a technique for writing certified procedures for automated reasoning. It reduces the validity of a logical statement to a symbolic computation.
 Let $P: Z \ra \prop$ be a predicate over a data type Z and $f: Z \ra \tt{bool}$ be a function such that the following theorem holds:
 
 \begin{equation*}
@@ -10,24 +10,26 @@ Let $P: Z \ra \prop$ be a predicate over a data type Z and $f: Z \ra \tt{bool}$ 
 
 If $\mathop{f} z$ reduces to \tt{true}, then the proof term  $\tt{f\_correct}~z~(\tt{refl}~\tt{bool}~\tt{true})$ with $\tt{refl}: \Pi A: \set,\, \Pi x: \el\,A,\, \pic (x = x)$, constitutes a proof of predicate $(P~z)$. In step 6 of checking an application of rule \tt{la\_generic},
 the primary challenge lies in reasoning modulo associativity and commutativity when manipulating expressions over $\bb{Z}$.
-The key idea is to provide a normalization function that transforms a $\bb{Z}$ expression into a canonical form,
-such that it can be reduced to a constant because variables will cancel each other, as is the case with the constant $f$ in \cref{ex:la_generic_example_red}.
+The key idea is to provide a normalization function that transforms a $\bb{Z}$ expression into a canonical form.
+% such that it can be reduced to a constant because variables will cancel each other, as is the case with the constant $f$ in \cref{ex:la_generic_example_red}.
 
 
 \subsection{Representation}
 \label{ssec:representation}
 
 The procedure is based on an algebraic group structure, denoted as  $\bb{G}$ defined in \cref{fig:grp}, which represents linear polynomials.
-The base type for this group's elements is $\bb{G}: \type$. The unary operator $\tt{cst}$ injects constants from $\bb{Z}$ into $\bb{G}$.
+The base type for its elements is $\bb{G}: \type$. The unary operator $\tt{cst}$ injects constants from $\bb{Z}$ into $\bb{G}$.
 The term $\tt{var}~c~x$ is intended for representing expressions $c \times x$ that appear as constituents of linear inequalities, where $c$ is an integer coefficient and $x$ a $\bb{Z}$ term, in particular a variable.
 The constructor $\tt{mul}$  represents the multiplication of an element of $\bb{G}$ by a constant. The constructor $\tt{opp}$ corresponds to unary minus.
 Lastly, the constructor $\add{}{}$ represents the addition between two elements of $\bb{G}$.
 
-Lambdapi provides the modifiers \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} for supporting associative and commutative operations,
-ensuring that terms are systematically transformed into a canonical form w.r.t.\ a builtin ordering relation, as described in \cite{univAC,ACorigin}. We declare the operator $\add{}{}$ as \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative},
-ensuring that expressions involving sums of elements of $\bb{G}$ are systematically canonicalized. In particular, terms of the form $\tt{var}~c~x$ for equal variables will be placed next to each other, facilitating simplification.
+Lambdapi provides modifiers %\lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} 
+for supporting associative and commutative operations,
+ensuring that terms are systematically transformed into a canonical form w.r.t.\ a builtin ordering relation \cite{univAC,ACorigin}. We declare the operator $\add{}{}$ as \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative},
+ensuring that expressions involving sums of elements of $\bb{G}$ are systematically canonicalized. 
+%In particular, terms of the form $\tt{var}~c~x$ for equal variables will be placed next to each other, facilitating simplification.
 
-\begin{figure}
+\begin{figure}[t]
 \begin{align*}
 & \bb{G}: \type & & \reify{} : \bb{Z} \ra \bb{G} & & \den{}: \bb{G} \ra \bb{Z} \\
 &|~\add{}{}: \bb{G} \ra \bb{G} \ra \bb{G} & & \reify{\tt{Z0}} \re \cst{\tt{Z0}} & & \den{\cst{c}} \re c \\
@@ -48,7 +50,7 @@ ensuring that expressions involving sums of elements of $\bb{G}$ are systematica
 \subsection{Associative Commutative Normalization}
 \label{ssec:normalization}
 
-\begin{figure}
+\begin{figure}[t]
 \begin{align}
 &\add{\var{c_1}{x}}{\var{c_2}{x}} \re \var{(c_1 + c_2)}{x} \\
 &\add{\var{c_1}{x}}{(\add{\var{c_2}{x}}{y})} \re \add{\var{(c_1 + c_2)}{x}}{y} \\
@@ -59,14 +61,15 @@ ensuring that expressions involving sums of elements of $\bb{G}$ are systematica
 &\opp{\var{c}{x}} \re \var{(-c)}{x} \\
 &\opp{\cst{c}} \re \cst{(-c)} \\
 &\opp{(\opp{x})} \re x \\
-&\opp{\add{x}{y}} \re \add{(\opp{x})}{(\opp{y})} \\
+&\opp{(\add{x}{y})} \re \add{(\opp{x})}{(\opp{y})} \\
+&\opp{(\mul{k}{x})} \re \mul{(-k)}{x} \\
 &\mul{k}{\var{c}{x}} \re \var{(k * c)}{x} \\
 &\mul{k}{(\opp{x})} \re \mul{(-k)}{x} \\
 &\mul{k}{(\add{x}{y})} \re \add{(\mul{k}{x})}{(\mul{k}{y})} \\
 &\mul{k}{\cst{c}} \re \cst{(k * c)} \\
 &\mul{c_1}{(\mul{c_2}{x})} \re \mul{(c_1 * c_2)}{x}
 \end{align}
-\caption{Rewrite system on canonical forms}
+\caption{Rewrite system on canonical forms.}
 \label{fig:grp-rw}
 \end{figure}
 
@@ -83,7 +86,7 @@ For variable terms, $\var{p}{x} \leq \var{q}{y}$ if either $x < y$, or $x = y$ a
 Let $\twoheadrightarrow^{AC}$ be the relation mapping every term t to its unique AC-canonical form denoted $[t]$.
 \end{definition}
 
- Two terms $t$ and $u$ are AC-equivalent (written $t \simeq_{AC} u$) iff their AC-canonical forms are equal.
+Two terms $t$ and $u$ are AC-equivalent (written $t \simeq_{AC} u$) iff their AC-canonical forms are equal.
 
 \begin{definition}%[Rewriting modulo AC-canonization]
 The relation $\ACcanon$ is defined as $\re_\Sigma\,\twoheadrightarrow^{AC}$, where $\Sigma$ contains the rewrite rules of \cref{fig:arith-ops,fig:grp-rw}. 
@@ -96,6 +99,7 @@ An $\ACcanon$ step is a standard $\re_\Sigma$ step with syntactic matching follo
 \end{lemma}
 \begin{proof} 
 	AProVE \cite{aprove} automatically proves the termination of $\rwModAC$. 
+\qed
 \end{proof}
 
 
@@ -105,16 +109,17 @@ An $\ACcanon$ step is a standard $\re_\Sigma$ step with syntactic matching follo
 \begin{proof}
 	We show that every critical pair is joinable using $\ACcanon$ and confluence of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
 % In the following, the terms that are not between square brackets are in AC-canonical form. We also write $[\add{p}{q}]$ to denote either $\add{p}{q}$ or $\add{q}{p}$.
+\qed
 \end{proof}
 
 We compare two $\bb{Z}$-terms $t_1$ and $t_2$ wrt $\ACcanon$ by reifying them into their corresponding $\bb{G}$-terms, denoted $[g_1]$ and $[g_2]$, using the reification function $\reify{}$,
 and normalizing them using $\twoheadrightarrow^{AC}$. Following the reduction rules specified in \cref{fig:grp-rw}, we can then compare their corresponding $\bb{Z}$-terms by applying the denotation function $\den{}$.
-To validate this procedure, it is necessary to establish the correctness of the following diagram, formally expressed by \cref{thm:normalization}.\todo[sm]{I don't understand why the arrow from $\bb{Z}$ to $\bb{G}$ has both $\reify{}$ and $\den{}$? Also, the text on the top left is strangely placed.}
+To validate this procedure, it is necessary to establish the correctness of the following diagram, formally expressed by \cref{thm:normalization}.
 
 \begin{figure}
-\center
+\centering
 % % https://q.uiver.app/#q=WzAsOCxbMSwyLCJcXGJ1bGxldCJdLFsxLDAsIlxcYnVsbGV0Il0sWzMsMiwiXFxidWxsZXQiXSxbMywwLCJcXGJ1bGxldCJdLFswLDIsInRfMSA9X1xcbWF0aGJie1p9IHRfMiJdLFswLDAsIlxcRG93bmFycm93KFxcVXBhcnJvdyh0XzEpKSA9X1xcbWF0aGJie1p9IFxcRG93bmFycm93KFxcVXBhcnJvdyh0XzIpKSJdLFs0LDAsIlxcRG93bmFycm93KFtnXzFdKSA9X1xcbWF0aGJie1p9IFxcRG93bmFycm93KFtnXzJdKSJdLFs0LDIsImdfMSA9X1xcbWF0aGJie1p9IGdfMiJdLFswLDEsIlxcRG93bmFycm93KFxcVXBhcnJvdyhcXF8pKSJdLFswLDIsIlxcaWZmIiwxLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZG90dGVkIn0sImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMSwzLCJbXFxfXSIsMCx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6ImRhc2hlZCJ9fX1dLFszLDIsIlxcRG93bmFycm93KFxcXykiXSxbMSwyLCIiLDAseyJzdHlsZSI6eyJuYW1lIjoiY29ybmVyIn19XV0=
-\[\begin{tikzcd}[ampersand replacement=\&]
+\(\begin{tikzcd}[ampersand replacement=\&]
 	{\Uparrow(t_1) =_\bb{G} (\Uparrow(t_2)} \& \bb{G} \&\& \bb{G} \& {[g_1] =_\bb{G} [g_2]} \\
 	\\
 	{t_1 =_\bb{Z} t_2} \& \bb{Z} \&\& \bb{Z} \& {\den{g_1} =_\bb{Z} \den{g_2}}
@@ -123,35 +128,36 @@ To validate this procedure, it is necessary to establish the correctness of the 
 	\arrow["{\Downarrow(\_)}", from=1-4, to=3-4]
 	\arrow["{\Uparrow(\_)}", from=3-2, to=1-2]
 	\arrow["\iff"{description}, dotted, no head, from=3-2, to=3-4]
-\end{tikzcd}\]
+\end{tikzcd}\)
 \end{figure}
 
 \begin{theorem}[Correctness of normalization]\label{thm:normalization}
 For all $\bb{G}$-terms $t$, we have $(\den{[t]}) = (\den{t})$ where $[t]$ is the AC-canonical form of $t$ with respect to $\longrightarrow^{AC}_\Sigma$.
+\end{theorem}
 \begin{proof}
-This is a meta-level proof, proceeding by structural induction on $t$.
-Assume that the normalization function $[\_]$ is implemented using a merge sort algorithm over the multiset of subterms $\bb{G}$, with respect to the associative-commutative operator $\oplus$.
-We focus on the inductive case where $t = t_1 \oplus t_2$.
-We have to show that $\den{[t_1 \oplus t_2]} = \den{(t_1)} + \den{(t_2)}$.
-By the induction hypothesis, we have:
-\[
-	\den{[t_1]} = \den{t_1} \quad \text{and} \quad \den{[t_2]} = \den{t_2}.
-\]
+  The proof proceeds by induction on $t$, and the key case is the one where $t = t_1 \oplus t_2$.
+% This is a meta-level proof, proceeding by structural induction on $t$.
+% Assume that the normalization function $[\_]$ is implemented using a merge sort algorithm over the multiset of subterms $\bb{G}$, with respect to the associative-commutative operator $\oplus$.
+% We focus on the inductive case where $t = t_1 \oplus t_2$.
+We have to show that $\mathop{\den{[t_1 \oplus t_2]}} = \mathop{(\den{t_1}) + (\den{t_2})}$.
+By the induction hypothesis, we have
+$\mathop{\den{[t_1]}} = \mathop{\den{t_1}}$ and $\mathop{\den{[t_2]}} = \mathop{\den{t_2}}$.
 Hence,
 \[
-	\den{[t_1 \oplus t_2]} = \mathop{\den{[t_1] \oplus [t_2]}} = \mathop{\den{[t_1]}} + \den{[t_2]} = \mathop{\den{(t_1 \oplus t_2)}}.
+  (\den{t_1}) + (\den{t_2})
+  = (\den{[t_1]}) + (\den{[t_2]})
+  = \mathop{\den{([t_1] \oplus [t_2])}}
 \]
-It remains to show that:
-\[
-	\den{[t_1 \oplus t_2]} = \mathop{\den{[t_1] \oplus [t_2]}}.
-\]
-
-This follows from the fact that $[t_1 \oplus t_2]$ is the canonical (i.e., sorted) form of the multiset of subterms in $t_1$ and $t_2$,
-and that merge-sorting two normalized (i.e., already sorted) linear polynomials yields the same result as normalizing (i.e sorting) their merge.
-Therefore, since the normalization preserves denotation, we conclude that $\den{[t]} = \mathop{\den{t}}$ for all $\bb{G}$-terms $t$.
+It remains to show that
+$\mathop{\den{([t_1] \oplus [t_2])}} = \mathop{\den{[t_1 \oplus t_2]}}$.
+Now, $[t_1]$, $[t_2]$, and $[t_1 \oplus t_2]$ are terms built solely from \tt{cst}, \tt{var}, and $\oplus$ since the remaining operators have been eliminated by applying the rules in \cref{fig:grp-rw}, and the terms on both sides of the equation contain the same multisets of subterms. The two terms are therefore identified by AC-canonicalization.
+%
+% $[t_1 \oplus t_2]$ is the canonical (i.e., sorted) form of the multiset of subterms in $t_1$ and $t_2$,
+% and that merge-sorting two normalized (i.e., already sorted) linear polynomials yields the same result as normalizing (i.e sorting) their merge.
+% Therefore, since the normalization preserves denotation, we conclude that $\den{[t]} = \mathop{\den{t}}$ for all $\bb{G}$-terms $t$.
+\qed
 \end{proof}
 
-\end{theorem}
 
 
 We make use of \cref{lem:conv} to embed $\bb{Z}$-terms into $\bb{G}$ to normalize and subsequent comparison.
@@ -166,4 +172,4 @@ Hence, $x = (\mathop{\den{(\reify{x})}})$ in all cases.
 \end{proof}
 
 The full proof \cref{lst:smtexampleproof} translated into Lambdapi can be found in \cref{app:example-translation}.
-In addition, we leverage this normalization process to support the \tt{arith-poly-norm} rule.
+In addition, we leverage this normalization process to support the \tt{arith-poly\-norm} rule.

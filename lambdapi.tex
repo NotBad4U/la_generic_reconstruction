@@ -4,7 +4,7 @@
 \subsection{Encoding Integers in Lambdapi}
 
 
-\begin{figure}
+\begin{figure}[t]
 \centering
 \begin{align*}\label{eq:eq1}
 &\bb{P}: \type & &\bb{Z}: \type   & &\tt{Comp}: \type & &\bb{B}: \type \\
@@ -29,12 +29,14 @@ to convert natural representations of values into elements of $\bb{Z}$.
 We also introduce enumeration types \tt{Comp} and $\bb{B}$ representing comparison operators and Booleans. 
 %
 To enable quantification over elements of these types, we introduce constants such as $\tt{int}: \set$ that represent codes for these types along with a rule for rewriting codes to their corresponding types, for example $\el~\tt{int} \re \bb{Z}$.
-Figure~\ref{fig:arith-ops} introduces operations on these types, including addition $(+)$ and comparison $(\doteq)$ over $\bb{Z}$. The functions \texttt{add} and \texttt{sub} implement addition and subtraction for binary positive numbers, respectively.
-We have also defined the operations of multiplication ($\mathbin{*}$) and subtraction ($\mathbin{-}$) over $\bb{Z}$. A detailed description of their implementation is provided in \cref{app:lambdapi-func-def}.
+Figure~\ref{fig:arith-ops} introduces operations on these types, including addition $(+)$ and comparison $(\doteq)$ over $\bb{Z}$. The functions \texttt{add} and \texttt{sub} implement addition and subtraction for binary positive numbers, respectively, cf. \cref{app:lambdapi-func-def}.
+We also define the operations of multiplication ($\mathbin{*}$) and subtraction ($\mathbin{-}$) over $\bb{Z}$. 
+% A detailed description of their implementation is provided in \cref{app:lambdapi-func-def}.
 The function $\texttt{cmp}: \bb{P} \to \bb{P} \to \texttt{Comp}$ performs a comparison between two binary positive numbers. 
 These operators are defined by rewriting rules that we will refer to as $\ra_\bb{Z}$ and $\ra_\bb{P}$ (for operations on $\bb{Z}$ and $\bb{P}$) in the following sections.
-The confluence of these rewriting rules has been proven using CSI \cite{CSI}. A detailed proof of confluence can be found in \cref{app:confluence-int-pos}.
-In addition, we leverage these rewriting rules to perform the constant folding required by the \texttt{evaluate} rule, enabling the final proof step to be discharged by reflexivity.
+The confluence of these rewriting rules has been proven using CSI \cite{CSI}, cf. \cref{app:confluence-int-pos}. 
+% A detailed proof of confluence can be found in \cref{app:confluence-int-pos}.
+We leverage these rewriting rules to perform the constant folding required by the \texttt{evaluate} rule, enabling the final proof step to be discharged by reflexivity.
 
 \begin{figure}
 \centering
@@ -107,7 +109,7 @@ For example, $1 < 2 \hookrightarrow \tt{istrue}(\tt{isLt}(1 \doteq 2)) \hookrigh
 
 We now outline the encoding of arithmetic expressions from SMT-LIB \cite[\S 5.2.1]{smtlib}. This extends the approach introduced in \cite{ColtellacciMD24} to handle arithmetic constructs.
 To avoid notational conflicts with the Lambdapi signature $\Sigma$, we denote the set of SMT-LIB sorts as $\Theta^\mathcal{S}$, the set of function symbols $\Theta^\cal{F}$, and the set of variables $\Theta^\cal{X}$.
-Our translation is based on the following functions:
+Our translation is based on the following functions:\todo[sm]{These functions are never used in the following. I think we can drastically shorten or even omit this section.}
 
 \begin{itemize}
 \item $\cal{D}$ translates declarations of sorts and functions in $\Theta^\cal{S}$ and $\Theta^\mathcal{F}$ into constants,
@@ -151,14 +153,13 @@ as lists with the constructors $\nil: \tt{clause}$ representing the empty clause
 The function $\cal{C}$ encodes each step by invoking the functions $\cal{D},\cal{S}$, and $\cal{E}$, and provides a proof term corresponding to the Alethe rule applied at that step.
 
 \begin{example}
-The translation of the steps t2 and t5 in \cref{lst:smtexampleproof} with the input problem definitions give us:
+The translation of the steps t2 and t5 in \cref{lst:smtexampleproof} with the input problem definitions yields:
 \begin{lstlisting}[language=Lambdapi,mathescape=true]
 symbol x: El int;
 symbol y: El int;
 ...
 opaque symbol t2: $\pid$ (¬ (3 < x)  ⟇ ¬ (x = 2) ⟇ ▩) ≔ begin ... end;
 opaque symbol t5: $\pid$ (¬ (x + y < 1) ⟇ (¬ (x = 2))  ⟇ (¬ (0 = y)) ⟇ ▩) ≔ begin ... end;
-...
 \end{lstlisting}
 \end{example}
 
@@ -167,6 +168,6 @@ While steps 1 through 5 of the algorithm correspond to explicit rewriting steps,
 This sequence reduces the initial sum to a comparison between constants, which can be evaluated to a Boolean (e.g. $0 > 1 \re \bot$), serving as the conclusion of the reduction to prove a contradiction.
 
 
-The reflection technique introduced by \cite{reflection-origin-coq} leverages the reduction system of the proof assistant to produce an efficient decidable automatic
-procedure for solving arithmetic goals over $\bb{Q}$, $\bb{R}$, and $\bb{Z}$. We followed this approach to implement our decision procedure for evaluating inequality.
-In the following section, we describe the corresponding extension of the function $\mathcal{C}$ defined in \cite{ColtellacciMD24}.
+% The reflection technique introduced by \cite{reflection-origin-coq} leverages the reduction system of the proof assistant to produce an efficient decidable automatic
+% procedure for solving arithmetic goals over $\bb{Q}$, $\bb{R}$, and $\bb{Z}$. We followed this approach to implement our decision procedure for evaluating inequality.
+% In the following section, we describe the corresponding extension of the function $\mathcal{C}$ defined in \cite{ColtellacciMD24}.

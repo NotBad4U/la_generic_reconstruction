@@ -119,14 +119,14 @@ Notice that the contexts \colorbox{blue!30}{$\Gamma$} of each step are all empty
   \centering
   \begin{tabular}{ll}
   Rule & Description \\ \hline
-  la\_generic & Tautologous disjunction of linear inequalities. \\
-  lia\_generic & Tautologous disjunction of linear integer inequalities. \\
+  la\_generic & Tautologous disjunction of linear inequalities \\
+  lia\_generic & Tautologous disjunction of linear integer inequalities \\
   la\_disequality & $t_1 \approx t_2 \lor \neg (t_1 \geq t_2) \lor \neg (t_2 \geq t_1)$ \\
   la\_totality & $t_1 \geq t_2 \lor t_2 \geq t_1$ \\
   la\_mult\_pos & $t_1 > 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie t_1 * t_3$ and $\bowtie \in \{<, >, \geq, \leq, =\}$ \\
   la\_mult\_neg & $t_1 < 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie_{inv} t_1 * t_3$ \\
   la\_rw\_eq & $(t \approx u) \approx (t \geq u \land u \geq t)$ \\
-  comp\_simplify & Simplification of arithmetic comparisons. \\
+  comp\_simplify & Simplification of arithmetic comparisons \\
   % (define-rule arith-int-eq-elim ((t Int) (s Int)) (= t s) (and (>= t s) (<= t s)))
   arith-int-eq-elim & $(t \approx s) \rightarrow t \geq s \land t \leq s $\\
   % (define-rule arith-refl-geq ((t ?)) (>= t t) true)
@@ -148,27 +148,27 @@ Notice that the contexts \colorbox{blue!30}{$\Gamma$} of each step are all empty
   % (define-rule arith-geq-tighten ((t Int) (s Int)) (not (>= t s)) (>= s (+ t 1)))
   arith-geq-tighten & $\neg (t \geq s) \rightarrow s \geq t + 1$ \\
   arith-poly-norm & polynomial (and monomial) normalization \\
-  evaluate & evaluate terms with constant leaves \\
+  evaluate & evaluate constant terms
   \end{tabular}
 
-  \caption{Linear arithmetic rules in Alethe supported.}
+  \caption{Linear arithmetic rules in Alethe supported in our encoding.}
   \label{table:linear-arith-rules}
 \end{table}
 
 \subsubsection{Linear arithmetic in Alethe.}
 \label{sssect:la-in-alethe}
 
-Proofs for linear arithmetic steps use a number of straightforward rules listed in \cref{table:linear-arith-rules}, such as \tt{la\_totality} that asserts totality of the ordering $\leq$.
-Following our encoding of Alethe in Lambdapi as described in \cite{ColtellacciMD24}, the linear arithmetic tautology rules \tt{la\_disequality}, \tt{la\_totality}, and \tt{la\_mult\_*} are implemented as lemmas.
+Proofs for linear arithmetic steps use a number of rules listed in \cref{table:linear-arith-rules}, such as \tt{la\_totality} that asserts totality of the ordering $\leq$.
+Following our encoding of Alethe in Lambdapi as described in \cite{ColtellacciMD24}, the linear arithmetic rules \tt{la\_disequality}, \tt{la\_totality}, and \tt{la\_mult\_*} are implemented as lemmas.
 We do not support the remaining arithmetic simplification rules, including the \tt{la\_tautology} rule from Alethe.
 This omission is primarily due to the fact that cvc5 extends Alethe with the RARE simplification rules \cite{rare}, which it uses in place of the original ones.
 Consequently, we support the RARE rules prefixed by \tt{arith-*}, as listed in \cref{table:linear-arith-rules}, and we have selectively implemented those that appear in the proof traces of the benchmarks discussed in \cref{sec:evaluation}.
-In addition, support for the \tt{evaluate} rule is provided through the work described in \cref{sec:encoding}, and support for \tt{arith-poly-norm} is realized through the benefits of the normalization approach detailed in \cref{sec:lia-reconstruction}.
+In addition, support for the \tt{evaluate} rule is provided through the work described in \cref{sec:encoding}, and support for \tt{arith-poly-norm} is realized through the normalization approach detailed in \cref{sec:lia-reconstruction}.
 
 A different approach is taken for the rules \tt{la\_generic} and \tt{lia\_generic}, as they describe an algorithm.
 While the \tt{la\_generic rule} is primarily intended for LRA logic, it is also applied in LIA proofs when all variables in the (in)equalities are of integer sort.
-A step of the rule \tt{la\_generic} represents a tautological clause of linear disequalities.  It can be checked by showing that the conjunction of
-the negated disequalities is unsatisfiable. After the application of some strengthening rules, the resulting conjunction is unsatisfiable,
+A step of the rule \tt{la\_generic} represents a tautological clause of linear inequalities.  It can be checked by showing that the conjunction of
+the negated inequalities is unsatisfiable. After the application of some strengthening rules, the resulting conjunction is unsatisfiable,
 even if \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize\upshape]{Int} variables are assumed to be \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize\upshape]{Real} variables.
 Although the rule may introduce rational coefficients, they often reduce to integers—as shown in \cref{lst:smtexampleproof}, where the coefficients are $(\frac{1}{1}, \frac{1}{1})$.
 Cases where coefficients cannot be reduced to integers are rare in practice, however, we reduce them to integers by \emph{clearing denominators}.
