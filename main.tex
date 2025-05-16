@@ -120,6 +120,7 @@ We presented an extension of Carcara's \cite{carcara} translation module \cite{C
 Our method includes a ring solver inspired by the computational reflection techniques described in \cite{reflection-origin-coq,ring-coq}.
 
 We have shown that this allows us to reconstruct several thousand SMT proofs that originate from the SMT-lib Benchmarks.
+To the best of our knowledge, this is the first work to automatically solve arithmetic goals in Lambdapi.
 Nonetheless, the current implementation does not scale well in arithmetic-heavy cases.
 As future work, we plan to improve Lambdapi’s built-in normalization mechanism to better handle such cases.
 We also intend to extend our work to support rational and real arithmetic, enabling verification of broader fragments of linear arithmetic (\texttt{LA}) theories.
