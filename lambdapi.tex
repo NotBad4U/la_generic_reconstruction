@@ -1,7 +1,7 @@
 \section{Encoding of Linear Integer Arithmetic in Lambdapi}
 \label{sec:encoding}
 
-\subsection{Encoding Integers in Lambdapi}
+%\subsection{Encoding Integers in Lambdapi}
 
 
 \begin{figure}[t]
@@ -105,69 +105,71 @@ We leverage these rewriting rules to perform the constant folding required by th
 Finally, we define inequality operators for $\bb{Z}$ as binary predicates by reducing them to the decidable comparison $\doteq$. They reduce to $\top$, $\bot$ (or negated) by applying rules of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
 For example, $1 < 2 \hookrightarrow \tt{istrue}(\tt{isLt}(1 \doteq 2)) \hookrightarrow \tt{istrue}(\tt{isLt}(\tt{Lt})) \hookrightarrow \tt{istrue}(\tt{true}) \hookrightarrow \top$, with $1 = \mathop{\tt{Zpos}} \tt{H}$ and $2 = \mathop{\tt{Zpos}} (\mathop{\tt{O}} \tt{H})$.
 
-\subsection{Functions used in the translation}
+We use this encoding of integer operations for extending the embedding of Alethe proofs in Lambdapi described in \cite{ColtellacciMD24}. In particular, the SMT sort $\textbf{Int}$ is mapped to $\el~\texttt{int}$, and the arithmetic operations of SMT to their counterparts in the Lambdapi encoding. The remainder of the paper describes how we simulate in Lambdapi the algorithm presented in \cref{sssect:la-in-alethe} for checking applications of the rule \tt{la\_generic}.
 
-We now outline the encoding of arithmetic expressions from SMT-LIB \cite[\S 5.2.1]{smtlib}. This extends the approach introduced in \cite{ColtellacciMD24} to handle arithmetic constructs.
-To avoid notational conflicts with the Lambdapi signature $\Sigma$, we denote the set of SMT-LIB sorts as $\Theta^\mathcal{S}$, the set of function symbols $\Theta^\cal{F}$, and the set of variables $\Theta^\cal{X}$.
-Our translation is based on the following functions:\todo[sm]{These functions are never used in the following. I think we can drastically shorten or even omit this section.}
+% \subsection{Functions used in the translation}
 
-\begin{itemize}
-\item $\cal{D}$ translates declarations of sorts and functions in $\Theta^\cal{S}$ and $\Theta^\mathcal{F}$ into constants,
-\item $\cal{S}$ maps sorts to $\Sigma$ types,
-\item $\cal{E}$ translates SMT expression to $\lpm$ terms,
-\item $\cal{C}$ translates a list of commands  $c_1 \dots c_n$ of the form $i.~\Gamma \triangleright~\varphi~(\mathcal{R}~P)[A]$ to typing judgments $\Gamma \vdash_\Sigma i := M: N$.
-\end{itemize}
+% We now outline the encoding of arithmetic expressions from SMT-LIB \cite[\S 5.2.1]{smtlib}. This extends the approach introduced in \cite{ColtellacciMD24} to handle arithmetic constructs.
+% To avoid notational conflicts with the Lambdapi signature $\Sigma$, we denote the set of SMT-LIB sorts as $\Theta^\mathcal{S}$, the set of function symbols $\Theta^\cal{F}$, and the set of variables $\Theta^\cal{X}$.
+% Our translation is based on the following functions:\todo[sm]{These functions are never used in the following. I think we can drastically shorten or even omit this section.}
 
-\begin{definition}%[Function $\mathcal{D}$ translating SMT sort and function symbol declarations]
-For each sort symbol $s$ with arity $n$ in $\Theta^\cal{S}$ we create a constant $s: \set \ra^1 \dots \ra^{n} \set$.
-For each function symbol $(f~\sigma^+)$ in $\Theta^\cal{F}$ we create a constant $f: \cal{S}(\sigma^+)$.
-\end{definition}
+% \begin{itemize}
+% \item $\cal{D}$ translates declarations of sorts and functions in $\Theta^\cal{S}$ and $\Theta^\mathcal{F}$ into constants,
+% \item $\cal{S}$ maps sorts to $\Sigma$ types,
+% \item $\cal{E}$ translates SMT expression to $\lpm$ terms,
+% \item $\cal{C}$ translates a list of commands  $c_1 \dots c_n$ of the form $i.~\Gamma \triangleright~\varphi~(\mathcal{R}~P)[A]$ to typing judgments $\Gamma \vdash_\Sigma i := M: N$.
+% \end{itemize}
 
-\begin{definition}%[Function $\mathcal{S}$ translating sorts of expression] 
-  The function $\mathcal{S}(s)$ mapping SMT sorts to $\lpm$ types is defined as follows.
-  \begin{itemize}
-    \item Case $s = \textbf{Bool}$, then $\Sort{s} = \el\,o$,
-    \item Case $s = \textbf{Int}$, then $\Sort{s} = \el~\texttt{int}$,
-    \item Case $s = \sigma_1\,\sigma_2 \dots \sigma_n$ then $\Sort{s} = \el{} (\mathcal{S}(\sigma_1) \leadsto \dots \leadsto \mathcal{S}(\sigma_n))$,
-    \item otherwise $\Sort{s} = \el\, \mathcal{D}(s)$.
-  \end{itemize}
-\end{definition}
+% \begin{definition}%[Function $\mathcal{D}$ translating SMT sort and function symbol declarations]
+% For each sort symbol $s$ with arity $n$ in $\Theta^\cal{S}$ we create a constant $s: \set \ra^1 \dots \ra^{n} \set$.
+% For each function symbol $(f~\sigma^+)$ in $\Theta^\cal{F}$ we create a constant $f: \cal{S}(\sigma^+)$.
+% \end{definition}
 
-\begin{definition}%[Function $\mathcal{E}$ translating SMT expressions]
-  The definition of $\E{e}$ mapping expressions from SMT to $\lpm$ is as follows.
-  \begin{itemize}
-  \setlength{\parskip}{0pt}
-  \item Case e $= (+~t_1\dots~t_n)$, then $\E{e} = \E{t_1} + ~\dots~ +\E{t_n}$.
-  \item Case e $= (*~t_1\dots~t_n)$, then $\E{e} = \E{t_1} * ~\dots~ *\E{t_n}$.
-  \item Case e $= (-t)$, then $\E{e} = \mathop{\sim} \E{t_1}$.
-  \item Case e $= (-~t_1\dots~t_n)$, then $\E{e} = \E{t_1} - ~\dots~ - \E{t_n}$.
-  \item Case e $= (\mathop{\bowtie} t_1~t_2)$ then $\E{e} = (\E{t_1} \bowtie \E{t_2})$ with $\mathop{\bowtie} = \{\approx, <,>,\leq,\geq \}$.
-  \item Case $e = (x: \sigma )$ with $x \in \Theta^\mathcal{X}$ a sorted variable, then $\E{e} = x: \cal{S}(\sigma)$.
-  \item Case $e = (c: \mathit{\tt{Int}})$  a constant integer value, then $\E{e} = c$.
-  \end{itemize}
-\end{definition}
-% \lstinline[basicstyle=\ttfamily,language=SMT]|Int|
-We define the function $\pid: \tt{Clause} \ra \type$ \cite[\S 3]{ColtellacciMD24}, mapping each clause~$c$ to the type $\pid~c$ of its proofs.
-Clauses are encoded in the type $\tt{Clause}$%: \type$ 
-as lists with the constructors $\nil: \tt{clause}$ representing the empty clause and $\veedot: \prop \ra \tt{Clause} \ra \tt{Clause}$.
-The function $\cal{C}$ encodes each step by invoking the functions $\cal{D},\cal{S}$, and $\cal{E}$, and provides a proof term corresponding to the Alethe rule applied at that step.
+% \begin{definition}%[Function $\mathcal{S}$ translating sorts of expression] 
+%   The function $\mathcal{S}(s)$ mapping SMT sorts to $\lpm$ types is defined as follows.
+%   \begin{itemize}
+%     \item Case $s = \textbf{Bool}$, then $\Sort{s} = \el\,o$,
+%     \item Case $s = \textbf{Int}$, then $\Sort{s} = \el~\texttt{int}$,
+%     \item Case $s = \sigma_1\,\sigma_2 \dots \sigma_n$ then $\Sort{s} = \el{} (\mathcal{S}(\sigma_1) \leadsto \dots \leadsto \mathcal{S}(\sigma_n))$,
+%     \item otherwise $\Sort{s} = \el\, \mathcal{D}(s)$.
+%   \end{itemize}
+% \end{definition}
 
-\begin{example}
-The translation of the steps t2 and t5 in \cref{lst:smtexampleproof} with the input problem definitions yields:
-\begin{lstlisting}[language=Lambdapi,mathescape=true]
-symbol x: El int;
-symbol y: El int;
-...
-opaque symbol t2: $\pid$ (¬ (3 < x)  ⟇ ¬ (x = 2) ⟇ ▩) ≔ begin ... end;
-opaque symbol t5: $\pid$ (¬ (x + y < 1) ⟇ (¬ (x = 2))  ⟇ (¬ (0 = y)) ⟇ ▩) ≔ begin ... end;
-\end{lstlisting}
-\end{example}
+% \begin{definition}%[Function $\mathcal{E}$ translating SMT expressions]
+%   The definition of $\E{e}$ mapping expressions from SMT to $\lpm$ is as follows.
+%   \begin{itemize}
+%   \setlength{\parskip}{0pt}
+%   \item Case e $= (+~t_1\dots~t_n)$, then $\E{e} = \E{t_1} + ~\dots~ +\E{t_n}$.
+%   \item Case e $= (*~t_1\dots~t_n)$, then $\E{e} = \E{t_1} * ~\dots~ *\E{t_n}$.
+%   \item Case e $= (-t)$, then $\E{e} = \mathop{\sim} \E{t_1}$.
+%   \item Case e $= (-~t_1\dots~t_n)$, then $\E{e} = \E{t_1} - ~\dots~ - \E{t_n}$.
+%   \item Case e $= (\mathop{\bowtie} t_1~t_2)$ then $\E{e} = (\E{t_1} \bowtie \E{t_2})$ with $\mathop{\bowtie} = \{\approx, <,>,\leq,\geq \}$.
+%   \item Case $e = (x: \sigma )$ with $x \in \Theta^\mathcal{X}$ a sorted variable, then $\E{e} = x: \cal{S}(\sigma)$.
+%   \item Case $e = (c: \mathit{\tt{Int}})$  a constant integer value, then $\E{e} = c$.
+%   \end{itemize}
+% \end{definition}
+% % \lstinline[basicstyle=\ttfamily,language=SMT]|Int|
+% We define the function $\pid: \tt{Clause} \ra \type$ \cite[\S 3]{ColtellacciMD24}, mapping each clause~$c$ to the type $\pid~c$ of its proofs.
+% Clauses are encoded in the type $\tt{Clause}$%: \type$ 
+% as lists with the constructors $\nil: \tt{clause}$ representing the empty clause and $\veedot: \prop \ra \tt{Clause} \ra \tt{Clause}$.
+% The function $\cal{C}$ encodes each step by invoking the functions $\cal{D},\cal{S}$, and $\cal{E}$, and provides a proof term corresponding to the Alethe rule applied at that step.
 
-The proof terms generated by $\mathcal{C}$ for steps \texttt{t2} and \texttt{t5} must faithfully represent the algorithm presented in \cref{sssect:la-in-alethe}.
-While steps 1 through 5 of the algorithm correspond to explicit rewriting steps, the final step (step 6) — which involves summing all inequalities — represents a multi-step rewriting sequence.
-This sequence reduces the initial sum to a comparison between constants, which can be evaluated to a Boolean (e.g. $0 > 1 \re \bot$), serving as the conclusion of the reduction to prove a contradiction.
+% \begin{example}
+% The translation of the steps t2 and t5 in \cref{lst:smtexampleproof} with the input problem definitions yields:
+% \begin{lstlisting}[language=Lambdapi,mathescape=true]
+% symbol x: El int;
+% symbol y: El int;
+% ...
+% opaque symbol t2: $\pid$ (¬ (3 < x)  ⟇ ¬ (x = 2) ⟇ ▩) ≔ begin ... end;
+% opaque symbol t5: $\pid$ (¬ (x + y < 1) ⟇ (¬ (x = 2))  ⟇ (¬ (0 = y)) ⟇ ▩) ≔ begin ... end;
+% \end{lstlisting}
+% \end{example}
+
+% The proof terms generated by $\mathcal{C}$ for steps \texttt{t2} and \texttt{t5} must faithfully represent the algorithm presented in \cref{sssect:la-in-alethe}.
+% While steps 1 through 5 of the algorithm correspond to explicit rewriting steps, the final step (step 6) — which involves summing all inequalities — represents a multi-step rewriting sequence.
+% This sequence reduces the initial sum to a comparison between constants, which can be evaluated to a Boolean (e.g. $0 > 1 \re \bot$), serving as the conclusion of the reduction to prove a contradiction.
 
 
-% The reflection technique introduced by \cite{reflection-origin-coq} leverages the reduction system of the proof assistant to produce an efficient decidable automatic
-% procedure for solving arithmetic goals over $\bb{Q}$, $\bb{R}$, and $\bb{Z}$. We followed this approach to implement our decision procedure for evaluating inequality.
-% In the following section, we describe the corresponding extension of the function $\mathcal{C}$ defined in \cite{ColtellacciMD24}.
+% % The reflection technique introduced by \cite{reflection-origin-coq} leverages the reduction system of the proof assistant to produce an efficient decidable automatic
+% % procedure for solving arithmetic goals over $\bb{Q}$, $\bb{R}$, and $\bb{Z}$. We followed this approach to implement our decision procedure for evaluating inequality.
+% % In the following section, we describe the corresponding extension of the function $\mathcal{C}$ defined in \cite{ColtellacciMD24}.

@@ -11,6 +11,8 @@ require open lambdapi.LiaAC;
 
 symbol x : El (int);
 symbol y : El (int);
+
+// Shared terms
 symbol p_2 ≔ ((x + y) < 1);
 symbol p_3 ≔ (x + y);
 symbol p_4 ≔ (¬ (x = 2));
@@ -24,6 +26,12 @@ symbol a0 : $\pid$ ((p_2 ∨ᶜ (3 < x)) ⟇ ▩);
 symbol a1 : $\pid$ (p_5 ⟇ ▩);
 
 symbol a2 : $\pid$ (p_7 ⟇ ▩);
+
+opaque symbol t1 : π̇ (p_2  ⟇ p_9 ⟇ ▩) ≔
+begin
+    simplify; rewrite or_identity_r;
+    apply π̇ₗ a0
+end;
 
 opaque symbol t2 : $\pid$ ((¬ p_9)  ⟇ p_4 ⟇ ▩) ≔ 
 begin
