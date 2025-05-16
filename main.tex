@@ -74,9 +74,8 @@ Lambdapi \cite{lambdapi} is a proof assistant based on the $\lambda\Pi$-calculus
 This foundation allows Lambdapi to serve as a framework for formalizing various logical systems.
 Designed with interoperability in mind, Lambdapi can import and export proofs, facilitating integration with other proof assistants \cite{LPAR2024:Translating_HOL_Light_proofs} such as Rocq \cite{Rocq-refman}, Lean \cite{lean4:2021}, and HOL-Light. 
 
-However, our prior work was limited to proofs expressed within the logic of Uninterpreted Functions (UF) and Quantifier-Free (QF).
+However, our prior work was limited to proofs expressed within the logic of Uninterpreted Functions (UF).
 In the present work, we extend this approach to support the reconstruction of proof steps involving linear integer arithmetic (LIA).
-In the theory of linear (integer) arithmetic, the solver for proving unsatisfiability, performs solving by checking whether a given formula involving integer variables, linear arithmetic operations, and possibly logical connectives are unsatisfiable.
 In the context of \tt{LIA}, the SMT solver determines unsatisfiability by analyzing formulas composed of integer variables, linear arithmetic operations, and logical connectives.
 This process typically relies on techniques such as Simplex methods adapted for integers \cite{SRI:simplex:dpllt} and cutting-plane methods to establish the unsatisfiability of linear constraints.
 Our main contribution is the implementation of an automatic decision procedure to verify these proof steps, using proof by reflection \cite{reflection-origin-coq,ring-coq}.
