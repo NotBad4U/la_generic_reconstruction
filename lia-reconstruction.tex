@@ -74,7 +74,7 @@ ensuring that expressions involving sums of elements of $\bb{G}$ are systematica
 %For \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]{associative commutative} symbols, Lambdapi does not use matching modulo AC \cite{matching-mod-AC,kirchner_rsp} as this problem is NP-complete \cite{ac-modulo-np-complete}.
 The transformation to canonical form implemented in Lambdapi ensures that sum expressions of the form $\var{c_1}{x_1} \oplus \cst{k_1} \oplus \var{c_2}{x_2} \oplus \dots \oplus \cst{k_m} \oplus \dots \oplus \var{c_n}{x_n}$ will be normalized such that any pair of terms $\var{p}{x}$ and $\var{q}{x}$ involving the same variable $x$ are placed next to each other,
 and all $\cst{k_i}$ will be placed at the left before the first variable $\var{c_j}{x_j}$.
-We will use the rewriting rules shown in \cref{fig:grp-rw} for reducing $\bb{G}$ expressions to sum expressions of the form indicated above. Notably, the resulting normal forms do not contain the constructors $\tt{mul}$ and $\tt{opp}$, as the associated rewrite rules eliminate them in favor of $\tt{var}, \tt{add}$ and $\tt{cst}$.
+We will use the rewriting rules shown in \cref{fig:grp-rw} for reducing $\bb{G}$ expressions. Notably, the resulting normal forms do not contain the constructors $\tt{mul}$ and $\tt{opp}$, as the associated rewrite rules eliminate them in favor of $\tt{var}, \tt{add}$ and $\tt{cst}$.
 
 \begin{definition}%[AC-canonical form]
 The $\leq$ builtin total order on $\bb{G}$-terms is defined as follows:
@@ -155,15 +155,15 @@ Therefore, since the normalization preserves denotation, we conclude that $\den{
 
 
 We make use of \cref{lem:conv} to embed $\bb{Z}$-terms into $\bb{G}$ to normalize and subsequent comparison.
+In addition, we leverage this normalization process to support the \tt{arith-poly-norm} rule.
 
 \begin{lemma}[Conversion]\label{lem:conv}
 For all $x: \bb{Z}$, we have $x = (\mathop{\den{(\reify{x})}})$.
 \end{lemma}
 \begin{proof}
 By induction on $x$. We consider the three cases: $x = \ZPos(n)$, $x = \ZNeg(n)$, and $x = \tt{Z0}$.  
-In each case, $\reify{x}$ yields the corresponding constant $\cst{x}$, and by definition of the denotation function, $\den{(\cst{x})} = x$.  
+In each case, $\reify{(x)}$ yields the corresponding constant $\cst{x}$, and by definition of the denotation function, $x = \mathop{\den{(\cst{x})}}$.
 Hence, $x = (\mathop{\den{(\reify{x})}})$ in all cases.
 \end{proof}
 
 The full proof \cref{lst:smtexampleproof} translated into Lambdapi can be found in \cref{app:example-translation}.
-In addition, we leverage this normalization process to support the \tt{arith-poly-norm} rule.
