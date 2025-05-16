@@ -74,13 +74,12 @@ Lambdapi \cite{lambdapi} is a proof assistant based on the $\lambda\Pi$-calculus
 This foundation allows Lambdapi to serve as a framework for formalizing various logical systems.
 Designed with interoperability in mind, Lambdapi can import and export proofs, facilitating integration with other proof assistants \cite{LPAR2024:Translating_HOL_Light_proofs} such as Rocq \cite{Rocq-refman}, Lean \cite{lean4:2021}, and HOL-Light. 
 
-However, our prior work was limited to proofs expressed within the logic of Uninterpreted Functions (UF) and Quantifier-Free (QF), as well as their subtheories.\todo[sm]{What does this mean? If it's QF\_UF, it should be written like that, but then there is no sub-theory.} 
+However, our prior work was limited to proofs expressed within the logic of Uninterpreted Functions (UF) and Quantifier-Free (QF).
 In the present work, we extend this approach to support the reconstruction of proof steps involving linear integer arithmetic (LIA).
-When the propositional model is unsatisfiable\todo[sm]{Doesn't make any sense.} in the theory of linear (integer) arithmetic, the solver creates a proof certificate.
-The conclusion\todo[sm]{Conclusion of what?} is a tautological clause of linear inequalities and equations and the justification of the step is a list of coefficients so that the linear combination becomes a trivially contradictory inequality after simplification (e.g., $0 \geq 1$).\todo[sm]{This covers la\_generic, but there is more to LIA.}
-To verify these certificates, we implemented an automatic decision procedure based on proof by reflection \cite{reflection-origin-coq,ring-coq}.
-% Most SMT solvers, including cvc5 and veriT, use the simplex method \cite{SRI:simplex:dpllt} to handle linear arithmetic.\todo[sm]{Is that relevant for proof checking?}
-
+In the theory of linear (integer) arithmetic, the solver for proving unsatisfiability, performs solving by checking whether a given formula involving integer variables, linear arithmetic operations, and possibly logical connectives are unsatisfiable.
+In the context of \tt{LIA}, the SMT solver determines unsatisfiability by analyzing formulas composed of integer variables, linear arithmetic operations, and logical connectives.
+This process typically relies on techniques such as Simplex methods adapted for integers \cite{SRI:simplex:dpllt} and cutting-plane methods to establish the unsatisfiability of linear constraints.
+Our main contribution is the implementation of an automatic decision procedure to verify these proof steps, using proof by reflection \cite{reflection-origin-coq,ring-coq}.
 
 The remainder of this paper is organized as follows.
 In \cref{sec:background}, we provide an overview of Lambdapi and present the structure of Alethe proof certificates for linear arithmetic.
