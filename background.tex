@@ -117,13 +117,15 @@ Notice that the contexts \colorbox{blue!30}{$\Gamma$} of each step are all empty
 
 \begin{table}[tp]
   \centering
+  \caption{Linear arithmetic rules in Alethe supported in our encoding.}
+
   \begin{tabular}{ll}
   Rule & Description \\ \hline
   la\_generic & Tautologous disjunction of linear inequalities \\
   lia\_generic & Tautologous disjunction of linear integer inequalities \\
   la\_disequality & $t_1 \approx t_2 \lor \neg (t_1 \geq t_2) \lor \neg (t_2 \geq t_1)$ \\
   la\_totality & $t_1 \geq t_2 \lor t_2 \geq t_1$ \\
-  la\_mult\_pos & $t_1 > 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie t_1 * t_3$ and $\bowtie \in \{<, >, \geq, \leq, =\}$ \\
+  la\_mult\_pos & $t_1 > 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie t_1 * t_3$ and $\bowtie \in \{<, >, \geq, \leq, \approx\}$ \\
   la\_mult\_neg & $t_1 < 0 \land (t_2 \bowtie t_3) \rightarrow t_1 * t_2 \bowtie_{inv} t_1 * t_3$ \\
   la\_rw\_eq & $(t \approx u) \approx (t \geq u \land u \geq t)$ \\
   comp\_simplify & Simplification of arithmetic comparisons \\
@@ -151,7 +153,6 @@ Notice that the contexts \colorbox{blue!30}{$\Gamma$} of each step are all empty
   evaluate & evaluate constant terms
   \end{tabular}
 
-  \caption{Linear arithmetic rules in Alethe supported in our encoding.}
   \label{table:linear-arith-rules}
 \end{table}
 
@@ -244,3 +245,10 @@ The operator \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize]{to_real}
 As a result, a proof for a problem formulated in \tt{LIA} may involve reasoning over real numbers.
 Since our approach does not support the \lstinline[language=SMT,basicstyle=\ttfamily\footnotesize\upshape]{Real} theory, we do not attempt to reconstruct such proofs and instead let the translation process fail in this case.
 \end{remark}
+
+\subsubsection{Quantifiers in Linear Arithmetic.}
+
+The Alethe format defines rules for quantifier instantiation, Skolemization, substitution, and other manipulations of bound variables.
+For instance, the rule \tt{forall\_inst} is used to express quantifier instantiation. It produces a unit clause with a formula of the form $(\neg \forall \bar{x_n}, \varphi) \lor (\varphi[\bar{t_n}])$,
+where $\varphi$ is a term containing the free variables $\bar{x_n}$, and each $t_i$ (for $i = 0, \dots, n$) is a ground term of the same sort as $x_i$.
+Accordingly, an Alethe proof will first instantiate the quantifier to produce a ground term, enabling subsequent arithmetic steps such as those involving \tt{la\_generic} or \tt{lia\_generic} to operate solely on ground terms.

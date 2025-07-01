@@ -2,7 +2,7 @@
 \label{sec:elaboration-lia}
 
 The rule \tt{lia\_generic} is similar to \tt{la\_generic}, but omits the coefficients,
-i.e.\ \colorbox{orange!30}{$[a_1 \dots a_r]$} is empty..
+i.e.\ \colorbox{orange!30}{$[a_1 \dots a_r]$} is empty.
 %Since this rule can introduce a disjunction of arbitrary linear integer inequalities without any additional hints, proof checking is \emph{NP-complete} \cite{Schrijver:lia}.
 We decided to leverage the elaboration process of \tt{lia\_generic} performed by Carcara, as doing otherwise would require implementing Fourier-Motzkin elimination for integers, as done in \cite{micromega,omegatest}, hence reimplementing work that was already done by the solver.
 

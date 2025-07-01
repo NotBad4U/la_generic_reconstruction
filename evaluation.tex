@@ -3,6 +3,8 @@
 
 \begin{table}[t]
 \centering
+\caption{Benchmark results.}
+
 \begin{tabular}{|c|c|c|c|c|c|c|}
 \hline                                                             % Succ - Err -Timeout   % Succ - Error        % Succ - Err - Timeout % Succ - Err - Timeout
 \textbf{Logic}                & \textbf{Bench}  & \textbf{Samples} & \textbf{Proofs}       & \textbf{Elaborate} & \textbf{Translate} & \textbf{Check} \\ \hline
@@ -16,7 +18,6 @@
 \multirow{2}{*}{\tt{UFLIA}}   & sledgeh    & 1521             &  1343 - 0 - 178       &  1278 - 222         & 1258 - 13 - 7       & 713 - 467 - 80   \\ \cline{2-7} 
                               & tokeneer        & 1732             &  1732 - 0 - 0         & 1689 - 43           & 1689 - 0 - 0        & 1482 - 197 - 10  \\ \hline
 \end{tabular}
-\caption{Benchmark results.}
 \label{table:benchmarks-description}
 \end{table}
 
@@ -47,6 +48,7 @@ The higher number of errors in \emph{SMPT} and \emph{sledgeh} is primarily due t
 
 \begin{table}[t]
 \centering
+\caption{Lambdapi checking times in milliseconds.}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
 \textbf{Bench}      & \textbf{Min} & \textbf{Q1} & \textbf{Mean} & \textbf{Q3} & \textbf{Max} \\ \hline
@@ -58,7 +60,6 @@ CAV2009           & 54           & 296         & 403           & 498         & 6
 sledgeh             & 53           & 166         & 354           & 552         & 1594         \\ \hline
 tokeneer            & 55           & 60          & 61            & 248         & 753          \\ \hline
 \end{tabular}
-\caption{Lambdapi checking times in milliseconds.}
 \label{table:benchmarks-list}
 \end{table}
 

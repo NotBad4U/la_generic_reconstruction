@@ -105,7 +105,7 @@ We leverage these rewriting rules to perform the constant folding required by th
 Finally, we define inequality operators for $\bb{Z}$ as binary predicates by reducing them to the decidable comparison $\doteq$. They reduce to $\top$, $\bot$ (or negated) by applying rules of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
 For example, $1 < 2 \hookrightarrow \tt{istrue}(\tt{isLt}(1 \doteq 2)) \hookrightarrow \tt{istrue}(\tt{isLt}(\tt{Lt})) \hookrightarrow \tt{istrue}(\tt{true}) \hookrightarrow \top$, with $1 = \mathop{\tt{Zpos}} \tt{H}$ and $2 = \mathop{\tt{Zpos}} (\mathop{\tt{O}} \tt{H})$.
 
-We use this encoding of integer operations for extending the embedding of Alethe proofs in Lambdapi described in \cite{ColtellacciMD24}. In particular, the SMT sort $\textbf{Int}$ is mapped to $\el~\texttt{int}$, and the arithmetic operations of SMT to their counterparts in the Lambdapi encoding. The remainder of the paper describes how we simulate in Lambdapi the algorithm presented in \cref{sssect:la-in-alethe} for checking applications of the rule \tt{la\_generic}.
+We use this encoding of integer operations for extending the embedding of Alethe proofs in Lambdapi \cite{ColtellacciMD24}. In particular, the SMT sort $\textbf{Int}$ is mapped to $\el~\texttt{int}$, and the arithmetic operations of SMT to their counterparts in the Lambdapi encoding. The remainder of the paper describes how we simulate in Lambdapi the algorithm presented in \cref{sssect:la-in-alethe} for checking applications of the rule \tt{la\_generic}.
 
 % \subsection{Functions used in the translation}
 
