@@ -1,0 +1,95 @@
+----------------------- REVIEW 1 ---------------------
+SCORE: 1 (weak accept)
+
+This paper presents the reconstruction of LA steps in Alethe. The
+reconstruction is done on proofs elaborated by Carcara in order to avoid
+lia generic steps without witness. On top of that, the paper contains a
+proof that the evaluation is correct (confluence + correctness).
+
+#TODO: better describe contribution?
+On the one hand, this is an important step to be able to reconstruct
+Alethe proofs in Lambdapi. On the other hand, the approach on the Farkas
+coefficient is not new (and was implemented before), the fact that the
+rewriting system is confluent and a decision procedure is not really
+surprising. What is new, is that lambdapi is the only published system
+that can check SMTLib proofs.
+
+
+1 Major
+═══════
+
+#DONE?: check comparison with Isabelle
+ ⁃ "The authors employed Isabelle’s linarith procedure to replay
+   arithmetic reasoning steps.": Isabelle does exactly what is
+   described in this paper [Schurr et al., CADE 2021, Sect. 4.3],
+   except that it relies on the simplifier to make the normalization.
+#DONE
+ ⁃ Table caption go above the table (which you can see at the absence
+   of space between caption and table)
+#TODO
+ ⁃ "The rule lia_generic is similar to la_generic, but omits the
+   coefficients, i.e. [a1 . . . ar ] is empty". This needs to be
+   phrased better. While the result is the same, the path from the
+   solver to find the solution can be very different and not rely on
+   simplex. And might not have a refutation with Farkas coefficients.
+#TODO
+ ⁃ Section 3: I did not understand anything (and I know what Carcara is
+   doing…). But there is no guarantee that Carcara is able to find a
+   different proof.
+#TODO: say in the paper what has been added to Carcara
+ ⁃ From the conclusion, "We presented an extension of Carcara’s": where
+   is this described in the paper? I could not find it.
+
+
+2 Minor
+═══════
+
+#DONE
+ ⁃ section 3 -> Section 3 (for every reference, including Equation or
+   Figures or Tables)
+#DONE
+ ⁃ Table 1: "≈" and "=" are used, I assume that "≈" was intended…
+#DONE
+ ⁃ "in Lambdapi described in [11]." -> "in Lambdapi [11]."
+
+
+
+----------------------- REVIEW 2 ---------------------
+SCORE: 2 (accept)
+
+This paper presents further work on a conversion from SMT proofs in the Alethe format to Dedukti, a framework aimed at translating proofs to a multitude of backends. This work in particular focuses on the extension of this translation (which was presented in previous work for QF_UF only) to linear arithmetic.
+
+The paper discusses the representation of the the arithmetic theory in Dedukti as well as new techniques for reflection, where normalization techniques are shown in Section 5, where symbolic computation can improve the expressiveness of the checker, in this case for AC normalization.
+
+The paper gives an evaluation on SMT-LIB benchmarks that combine UF and LIA theories of SMT-LIB, showing some promosing results.
+
+Overall the paper addresses a very important problem in SMT and contributes a useful feature (namely, an automatic translation to an existing framework). Thus, I think the paper should be accepted.
+
+As minor comments, a few points in the evaluation could be further clarified.
+
+#DONE, except for the part on the TCB
+First, the paper mentioned that the translation supports UF and LIA theories, but it is not clear how quantified logics (UFLIA, LIA) complicate the picture, isn't it the case that one also needs to handle quantifier instantiation for the proofs to be complete?  In general, is it the case that for the "success" reported in Table 2 that there were no "holes" in the proof whatsoever? This should be made clear in the text, i.e. if proof checking succeeds in your pipeline, what remains in the trusted computing base?
+
+#TODO
+Also, from the presentation of the evaluation it wasn't clear some basic summary of how much overhead the entire proof generation + proof checking pipeline is with respect to solving alone. The paper should add an overall summary of this ratio to give the reader a clear idea of how practical the approach is. It seems that proof checking in many cases is less than a second, but a scatter plot may help give a clearer idea.
+
+
+
+----------------------- REVIEW 3 ---------------------
+SCORE: 2 (accept)
+
+The paper presents an extension of a previously developed proof-assistant/SMT-solver integration, along a Sledgehammer-like scheme: goals are delivered from the proof assistant to the solver, and  then the results sent back by the solver are not trusted but certified within the proof assistant's logic. In this case, the proof assistant is LambdaPi, which is connected with SMT solvers, with the reconstruction being done by an independent SMT proof checker called Carcara. The extension is about moving from the logic of uninterpreted functions to integer linear arithmetic.
+
+This work involves a nontrivial adaptation of known techniques from the literature on proof assistants in a competent way. In addition, it is supported by some smart design decisions -- notably leveraging Carcara's reconstruction facility for arithmetic reasoning gaps. Overall, a nice contribution, perfectly in the scope of FroCoS. The paper is also very well written, with revealing examples and clear proof sketches.  
+
+
+Other comments  
+
+#DONE(?)
+Typo: "empty.."
+
+#TODO
+Do you have any concrete plans to address the scalability issues discovered during the evaluation? What would "improving Lambdapi’s built-in normalization mechanism" mean?
+
+#DONE
+First paragraph of the related work section: Please provide a reference to the Isabelle/HOL work.
