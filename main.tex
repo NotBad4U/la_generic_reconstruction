@@ -119,14 +119,18 @@ Nevertheless, our framework offers the advantage of supporting proof export from
 \section{Conclusion}
 \label{sec:conclusion}
 
-We presented an extension of Carcara's \cite{carcara}\footnote{\url{https://github.com/NotBad4U/carcara/tree/lambdapi-translate} refers to a fork of Carcara and will remain valid until the changes are merged into the main repository.}\todo[sm]{The reviewer ask you to explain in the text what parts of Carcara you extended. I don't think the link to a temporary fork is useful.} translation module \cite{ColtellacciMD24} for reconstructing arithmetic reasoning steps in Alethe proof traces involving \changed{sm}{linear arithmetic reasoning} in the foundational proof assistant Lambdapi \cite{lambdapi}.
+We presented an extension of Carcara's \cite{carcara}\footnote{\url{https://github.com/NotBad4U/carcara/tree/lambdapi-translate} refers to a fork of Carcara and will remain valid until the changes are merged into the main repository.}\todo[sm]{The reviewer ask you to explain in the text what parts of Carcara you extended. I don't think the link to a temporary fork is useful.}\todo[ac]{The repository can be archived in GH and then put a message with a link to redirect with the main repository}
+ translation module \cite{ColtellacciMD24} for reconstructing arithmetic reasoning steps in Alethe proof traces involving \changed{sm}{linear arithmetic reasoning} in the foundational proof assistant Lambdapi \cite{lambdapi}.
+\changed{ac}{This new module enables the export of an Alethe proof, together with its \emph{input problem} parsed and elaborated by Carcara, into a Lambdapi file that can be independently verified using the Lambdapi compiler.}
 Our method includes a ring solver inspired by the computational reflection techniques described in \cite{reflection-origin-coq,ring-coq}.
 
 We have shown that this allows us to reconstruct several thousand SMT proofs that originate from the SMT-lib Benchmarks.
 To the best of our knowledge, this is the first work to automatically solve arithmetic goals in Lambdapi.
 Nonetheless, the current implementation does not \changed{sm}{yet} scale well in arithmetic-heavy cases.
 As future work, we plan to improve Lambdapi's built-in normalization mechanism to better handle such cases.\todo[sm]{Can you say more here?}
-We also intend to extend our work to support rational and real arithmetic, enabling verification of broader fragments of linear arithmetic (\changed{sm}{LRA}) theories.\todo[sm]{If I understand correctly, this mainly requires a representation of rationals in Lambdapi? Perhaps say more about this.}
+We also intend to extend our work to support rational and real arithmetic, enabling verification of broader fragments of linear arithmetic (\changed{sm}{LRA}) theories.
+\changed{ac}{But it will requires first to encode rational and real arithmetic in Lambdapi and their normalization function ,based on $\mathop{gcd}$ operator, necessary for proof by reflection.}
+\todo[sm]{If I understand correctly, this mainly requires a representation of rationals in Lambdapi? Perhaps say more about this.}
 
 \bibliographystyle{splncs04}
 \bibliography{refs}
