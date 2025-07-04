@@ -78,7 +78,7 @@ Designed with interoperability in mind, Lambdapi can import and export proofs, f
 However, our prior work was limited to proofs expressed within the logic of Uninterpreted Functions (UF).
 In the present work, we extend this approach to support the reconstruction of proof steps involving linear integer arithmetic (LIA).
 In the context of LIA, the SMT solver determines unsatisfiability by analyzing formulas composed of integer variables, linear arithmetic operations, and logical connectives.
-This process typically relies on techniques such as Simplex methods adapted for integers \cite{SRI:simplex:dpllt} and cutting-plane methods \todo[sm]{add reference} to establish the unsatisfiability of linear constraints.
+This process typically relies on techniques such as Simplex methods adapted for integers and cutting-plane methods to establish the unsatisfiability of linear constraints \cite{SRI:simplex:dpllt}.
 Our main contribution is the implementation of an automatic decision procedure to verify these proof steps, using proof by reflection \cite{reflection-origin-coq,ring-coq}.
 
 The remainder of this paper is organized as follows.
