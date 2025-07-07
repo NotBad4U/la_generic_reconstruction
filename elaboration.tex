@@ -32,7 +32,8 @@ that does not use \tt{lia\_generic}. Carcara will check this subproof and then r
 (step S.t_m (cl false) :rule ...)
 (step t.t_m+1 (cl (not l1) ... (not ln) false) :rule subproof)
 (step t.t_m+2 (cl (not false)) :rule false)
-(step S (cl (not l1) ... (not ln)) :rule resolution :premises (S.t_m+1 S.t_m+2))
+(step S (cl (not l1) ... (not ln)) 
+        :rule resolution :premises (S.t_m+1 S.t_m+2))
 \end{lstlisting}
 
 In List.~\ref{lst:elab_lia}, steps $\tt{S.h\_1}$ until $\tt{S.t\_m}$ are imported from the cvc5 proof.

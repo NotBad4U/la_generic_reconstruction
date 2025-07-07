@@ -11,7 +11,8 @@ opaque symbol t2: $\pid$ ((¬ (3 < x) ∨ᶜ ¬ (x = 2)) ⟇ ▩) {
     set H1l' ≔ ((— 1) * (x - 2)); set H1r' ≔ ((— 1) * 0);
     have H1': $\pic$ (H1l' ≥ H1r') { refine Z_eq_implies_ge H1 }; remove H1;
     have contra : $\pic$ ((⇓ (⇑ (H0l' + H1l'))) ≥ (⇓ (⇑ (H0r' + H1r')))){
-        rewrite ⇓_⇑; rewrite ⇓_⇑; apply (Zsum_geq_s H0l' H0r' H1l' H1r' H0 H1');
+        rewrite ⇓_⇑; rewrite ⇓_⇑; 
+        apply (Zsum_geq_s H0l' H0r' H1l' H1r' H0 H1');
     };
     apply (⇒ᶜₑ' contra); apply ⊤ᶜᵢ;
 };
