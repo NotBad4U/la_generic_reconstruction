@@ -176,5 +176,14 @@ In each case, $\reify{(x)}$ yields the corresponding constant $\cst{x}$, and by 
 Hence, $x = (\mathop{\den{(\reify{x})}})$ in all cases.
 \end{proof}
 
-\todo[sm]{We don't have space for showing the full translation of the running example, but perhaps we could show the translation of a single rule?}
-%The full proof \cref{lst:smtexampleproof} translated into Lambdapi can be found in \cref{app:example-translation}.
+% Example
+
+\lstinputlisting[language=Lambdapi,mathescape=true,label={lst:translation-example},caption={Lambdapi proof of List. \ref{lst:smtexampleproof}}]{short-ex.lp}
+
+We present in List. \ref{lst:translation-example} the translation of Step \tt{t2} from List. \ref{lst:smtexampleproof} using our Carcara module.
+The \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|rewrite Zinv_lt_eq| step at line 3 performs the normalization from Step 1, rewriting $\neg (3 < x)$ as $\neg (\sim 3 > \sim x)$.
+The lemmas \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Z_diff_gt_Z0| and \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Z_diff_eq_Z0_eq| (lines 4–5) implement Step 2.
+Since the goal involves a $>$ inequality, Step 3 applies with the lemma \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize\upshape]|Zgt_le_succ_r_eq| (line 6).
+The coefficients $[\frac{1}{1}, -\frac{1}{1}]$ from Step 4 are trivially cast to $\bb{Z}$ and applied in lines 7–8.
+To express all inequalities uniformly, remaining equalities are rewritten as $\geq$ using \tt{Z\_eq\_implies\_ge} (line 12).
+Finally, Step 6 derives the contradiction by summing inequalities from lines 13 to 17.
