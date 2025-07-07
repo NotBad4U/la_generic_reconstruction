@@ -101,9 +101,6 @@ An empirical evaluation of our approach is provided in Sect.~\ref{sec:evaluation
 \label{sec:related}
 
 The reconstruction for Alethe proofs produced by the veriT solver has been implemented within Isabelle/HOL \cite{aletheInIsa} to enhance the reconstruction success rate compared to Z3.
-% sm: No – the paper clearly says that linarith was previously used for reconstructing Z3 proofs but that its scope was limited.
-%The authors employed Isabelle's \emph{linarith} procedure to replay arithmetic reasoning steps. This tactic serves as a decision procedure over real numbers, rather than integers or natural numbers, and is based on Fourier-Motzkin elimination.
-%However, the authors note that Isabelle's arithmetic procedure is incomplete and relatively inefficient for reconstructing arithmetic proofs; consequently, specific rules are reconstructed heuristically to improve performance.
 Concerning linear arithmetic reasoning, they also follow the algorithm described in Sect.~\ref{ssect:alethe}, relying on Isabelle's simplifier (which supports reasoning modulo associativity and commutativity) for normalizing expressions.
 
 Besson \cite{micromega} introduces a modular framework for integrating SMT solvers with the Rocq proof assistant, emphasizing the generation and efficient verification of proof certificates directly within Coq.

@@ -23,7 +23,6 @@ whenever $\Gamma \vdash_\Sigma t: A$ and $t \hookrightarrow_{\beta\Sigma} v$ the
 
 A Lambdapi typing judgment $\Gamma \vdash_\Sigma t : A$ asserts that term $t$ has type $A$ in the context $\Gamma$ and the signature $\Sigma$.
 The typing rules of $\lpm$ are those of  $\lambda\Pi$ \cite[\S 2]{lf}, except for the rule (Conv), given below, that identifies types modulo~$\textcolor{orange}{\equiv_{\beta\Sigma}}$ instead of just modulo $\beta$-reduction. 
-%% sm: removed figure to save some space
 \[
     \begin{prooftree}
     \hypo{\Gamma, \vdash_\Sigma B: u}
@@ -36,7 +35,6 @@ The typing rules of $\lpm$ are those of  $\lambda\Pi$ \cite[\S 2]{lf}, except fo
 In our encoding presented in \cite{ColtellacciMD24},  we employ Tarski-style universes \cite{intuitype} where types are represented by elements of a base type and interpreted via a decoding function.
 We define the constant $\prop: \type$ for the type of propositions and the decoding function $\pic: \prop \ra \type$ that maps each proposition to $\type$. This is necessary because Lambdapi does not support quantification over a variable of type $\type$: it is not possible to assign the type $\Pi X : \type,(X \ra \prop) \ra \prop$ to the universal quantifier $\forall$.
 To circumvent this, we have the constant $\set : \type$ for the types of object-terms, and a decoding function ${\el}: \set \ra \type$ that embeds $\set$ into $\type$.
-%% sm: added "universal" for a better line break
 This allows us to define the universal quantifier as $\forall: \Pi x: \set, (\el~x \ra \prop) \ra \prop$.
 To quantify over propositions, we further define a constant $o: \set$ and add the rewrite rule  $\el\, o \re \prop$.
 This encoding is well-established in the literature on systems formalized in Lambdapi \cite{blanqui_et_al:LIPIcs.FSCD.2021.20}. 
