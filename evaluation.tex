@@ -8,13 +8,13 @@
 \hline                                                             % Succ - Err -Timeout   % Succ - Error        % Succ - Err - Timeout % Succ - Err - Timeout
 \textbf{Logic}                & \textbf{Benchmark}  & \textbf{Samples} & \textbf{Proofs}       & \textbf{Elaborate} & \textbf{Translate} & \textbf{Check} \\ \hline
 \multirow{4}{*}{\tt{LIA}}     & tptp            & 36               &  36 - 0 - 0           &  36 - 0             & 36 - 0 - 0          & 28 - 8 - 0       \\ \cline{2-7} 
-                              & Ultimate        & 153              &  120 - 0 - 33         &  73 - 80            & 68 - 5 - 0          & 50 - 18 - 0      \\ \cline{2-7} 
+                              & Ultimate        & 153              &  120 - 0 - 33         &  73 - 47            & 68 - 5 - 0          & 50 - 18 - 0      \\ \cline{2-7} 
                               & Svcomp'19      & 27               &  27 - 0 - 0           &  25 - 2             & 0 - 25 - 0          & 0                \\ \cline{2-7} 
-                              & psyco           & 50               &  48 - 0 - 2           &  48 - 2             & 43 - 0 - 5          & 0 - 39 - 6       \\ \hline
-\multirow{2}{*}{\tt{QFLIA}}   & SMPT            & 1568             &  1501 - 67 - 0        &  1491 - 32          & 1470 - 0 - 21       & 804 - 638 - 34   \\ \cline{2-7}
-                              & rings           & 294              &  63 - 0 - 231         &  49 - 21            & 49 - 0 - 0          & 7 - 0 - 42       \\ \cline{2-7} 
-                              & CAV2009       & 85               &  85 - 0 - 0           &  19 - 0             & 19 - 0 - 0          & 19 - 0 - 0       \\ \hline
-\multirow{2}{*}{\tt{UFLIA}}   & sledgeh    & 1521             &  1343 - 0 - 178       &  1278 - 222         & 1258 - 13 - 7       & 713 - 467 - 80   \\ \cline{2-7} 
+                              & psyco           & 50               &  48 - 0 - 2           &  48 - 0             & 43 - 0 - 5          & 0 - 37 - 6       \\ \hline
+\multirow{2}{*}{\tt{QFLIA}}   & SMPT            & 1568             &  1529 - 39 - 0        &  1497 - 32          & 1476 - 0 - 21       & 804 - 638 - 34   \\ \cline{2-7}
+                              & rings           & 294              &  70 - 1 - 223         &  49 - 21            & 49 - 0 - 0          & 7 - 0 - 42       \\ \cline{2-7} 
+                              & CAV2009       & 85               &  85 - 0 - 0           &  19 - 66             & 19 - 0 - 0          & 19 - 0 - 0       \\ \hline
+\multirow{2}{*}{\tt{UFLIA}}   & sledgeh    & 1521             &  1343 - 0 - 178       &  1278 - 65         & 1258 - 13 - 7       & 711 - 467 - 80   \\ \cline{2-7} 
                               & tokeneer        & 1732             &  1732 - 0 - 0         & 1689 - 43           & 1689 - 0 - 0        & 1482 - 197 - 10  \\ \hline
 \end{tabular}
 \label{table:benchmarks-description}
@@ -24,9 +24,7 @@ Our benchmark suite shown in Table~\ref{table:benchmarks-description} is compose
 The suite includes a total of 5,466 samples drawn from 9 benchmark categories spanning three SMT-LIB logics: \texttt{LIA}, \texttt{QFLIA}, and \texttt{UFLIA} that correspond to those covered by our method.
 %These were selected because our previous work supported the \texttt{QF} and \texttt{UF} fragments.
 Within the logics \texttt{QFLIA} and \texttt{UFLIA}, we prioritized benchmarks with the most significant number of available samples.
-Table~\ref{table:benchmarks-description}
-\todo[sm]{Check results: the sum of numbers in column $i+1$ should equal the number of successful executions in column $i$.}
-provides a detailed breakdown of the benchmarks and the corresponding results.
+Table~\ref{table:benchmarks-description} provides a detailed breakdown of the benchmarks and the corresponding results.
 The \emph{Logic} column indicates the SMT theory used, while the \emph{Benchmark} column lists abbreviated benchmark names.
 The column \emph{Samples} describes the number of problems available with status \emph{unsat}. 
 Each of the columns \emph{Proofs}, \emph{Translate}, and \emph{Check} reports a triple in the format \tt{success - error - timeout}, representing respectively the number of successful executions, failed attempts, and timeouts. 
@@ -58,9 +56,9 @@ A timeout of 20 seconds was set for Lambdapi when type-checking the final proofs
 
 All nine benchmarks demonstrated consistently reliable proof generation, with few or no timeouts, except for the \emph{rings} benchmark.
 The elaboration phase was generally robust, except in the \emph{Ultimate} benchmark, where an error in the elaborator caused failures.
-For \texttt{LIA}, performance in the translation and checking stages was mixed. In particular, for \emph{Svcomp'19} and \emph{psyco}, no or few proofs could be translated or verified, mainly due to currently unsupported simplification rules involving the \texttt{ite} operator.\todo[sm]{Would this be difficult to support?}
+For \texttt{LIA}, performance in the translation and checking stages was mixed. In particular, for \emph{Svcomp'19} and \emph{psyco}, no or few proofs could be translated or verified, mainly due to currently unsupported simplification rules involving the \texttt{ite} operator.
 The \texttt{QFLIA} benchmarks exhibited more reliable proof checking in \emph{SMPT} and \emph{CAV2009}, while only a small number of proofs from the \emph{rings} benchmark were successfully checked.
-The errors encountered during the elaboration of the \emph{CAV2009} come from a bug in the elaborator.\todo[sm]{Did you consider fixing the bug?} Since the samples in this benchmark are derived from a common base problem while increasing in size, the bug propagated across all samples that depend on the same base instance.
+The errors encountered during the elaboration of the \emph{CAV2009} come from a bug in the elaborator. Since the samples in this benchmark are derived from a common base problem while increasing in size, the bug propagated across all samples that depend on the same base instance.
 The limited success with checking proofs in the \emph{rings} category is due to the presence of \texttt{la\_generic} terms with hundreds of uninterpreted variables; the current normalization mechanism, described in Sect.~\ref{ssec:normalization}, relies on a built-in term ordering that is not sufficiently efficient in this setting.
 Benchmarks under \texttt{UFLIA} performed better throughout the pipeline. Most proofs were successfully generated and elaborated, and a large portion were translated and verified by Lambdapi, particularly in the \emph{tokeneer} dataset.
 The higher number of errors in \emph{SMPT} and \emph{sledgeh} is primarily due to unsupported RARE rules related to the \tt{QF\_UF} logic, as well as unhandled cases in the \texttt{evaluate} rule for \texttt{LIA} and \texttt{QF\_UF}.
