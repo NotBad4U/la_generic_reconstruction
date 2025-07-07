@@ -18,21 +18,21 @@
 \label{fig:sorts-constructors}
 \end{figure}
 
-The definition \changed{sm}{of integers in Lambdapi that we use appears in Fig.~\ref{fig:sorts-constructors}. It} follows a common encoding found in many other theories, including the one adopted in the Rocq standard library \cite{Rocq-refman}.
+The definition of integers in Lambdapi that we use appears in Fig.~\ref{fig:sorts-constructors}. It follows a common encoding found in many other theories, including the one adopted in the Rocq standard library \cite{Rocq-refman}.
 First, the type $\bb{P}$  is an inductive type representing strictly positive integers in binary form.
 Starting from 1 (represented by the constructor \tt{H}), one can add a new least significant digit via the constructor \tt{O} (digit 0) or the constructor \tt{I} (digit 1). 
 The type $\bb{Z}$ represents integers in binary form.
 An integer is either zero (with constructor \tt{Z0}) or a strictly positive number \tt{Zpos} (coded as a $\bb{P}$) or a strictly negative number \tt{Zneg}.
-We make use of Lambdapi's \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize]|builtin| mechanism to enable decimal notation for numeric values, \changed{sm}{allowing us to write, e.g., $2$ instead of} $\ZPos (\mathop{\tt{O}} \tt{H})$.
+We make use of Lambdapi's \lstinline[language=Lambdapi,basicstyle=\ttfamily\footnotesize]|builtin| mechanism to enable decimal notation for numeric values, allowing us to write, e.g., $2$ instead of $\ZPos (\mathop{\tt{O}} \tt{H})$.
 %
 We also introduce enumeration types \tt{Comp} and $\bb{B}$ representing comparison operators and Booleans. 
-%
-To enable quantification over elements of these types, we introduce constants such as $\tt{int}: \set$ that represent codes for these types along with a rule for rewriting codes to their corresponding types, for example $\el~\tt{int} \re \bb{Z}$.
-Figure~\ref{fig:arith-ops} introduces operations on these types, including addition $(+)$ and comparison $(\doteq)$ over $\bb{Z}$. The \changed{sm}{auxiliary operations \texttt{add}, \texttt{sub}, and \texttt{cmp} implement addition, subtraction, and comparison for binary positive numbers; their definitions are not shown here for space restrictions.}
+
+In order to enable quantification over elements of these types, we introduce constants such as $\tt{int}: \set$ that represent codes for these types along with a rule for rewriting codes to their corresponding types, for example $\el~\tt{int} \re \bb{Z}$.
+Figure~\ref{fig:arith-ops} introduces operations on these types, including addition $(+)$ and comparison $(\doteq)$ over $\bb{Z}$. The auxiliary operations \texttt{add}, \texttt{sub}, and \texttt{cmp} implement addition, subtraction, and comparison for binary positive numbers; their definitions are not shown here for space restrictions.
 %, respectively, cf.\ Sect.~\ref{app:lambdapi-func-def}.
 We also define the operations of multiplication ($\mathbin{*}$) and subtraction ($\mathbin{-}$) over $\bb{Z}$. 
 % A detailed description of their implementation is provided in \cref{app:lambdapi-func-def}.
-\changed{sm}{We will refer to the rewriting rules defining these operations} as $\ra_\bb{Z}$ and $\ra_\bb{P}$ (for operations on $\bb{Z}$ and $\bb{P}$) in the following sections.
+We will refer to the rewriting rules defining these operations as $\ra_\bb{Z}$ and $\ra_\bb{P}$ (for operations on $\bb{Z}$ and $\bb{P}$) in the following sections.
 The confluence of these rewriting rules has been proven using CSI \cite{CSI}. %, cf. \cref{app:confluence-int-pos}. 
 % A detailed proof of confluence can be found in \cref{app:confluence-int-pos}.
 We leverage these rewriting rules to perform the constant folding required by the \texttt{evaluate} rule, enabling the final proof step to be discharged by reflexivity.
@@ -104,7 +104,7 @@ We leverage these rewriting rules to perform the constant folding required by th
 Finally, we define inequality operators for $\bb{Z}$ as binary predicates by reducing them to the decidable comparison $\doteq$. They reduce to $\top$, $\bot$ (or negated) by applying rules of $\ra_\bb{Z}$ and $\ra_\bb{P}$.
 For example, $1 < 2 \hookrightarrow \tt{istrue}(\tt{isLt}(1 \doteq 2)) \hookrightarrow \tt{istrue}(\tt{isLt}(\tt{Lt})) \hookrightarrow \tt{istrue}(\tt{true}) \hookrightarrow \top$. %, with $1 = \mathop{\tt{Zpos}} \tt{H}$ and $2 = \mathop{\tt{Zpos}} (\mathop{\tt{O}} \tt{H})$.
 
-We use this encoding of integer operations for extending \changed{sm}{our existing} embedding of Alethe proofs in Lambdapi \cite{ColtellacciMD24}. In particular, the SMT sort $\textbf{Int}$ is mapped to $\el~\texttt{int}$, and the arithmetic operations of SMT to their counterparts in the Lambdapi encoding. The \changed{sm}{following section} describes how we \changed{sm}{leverage this representation of integers in Lambdapi to} simulate the algorithm presented in \cref{sssect:la-in-alethe} for checking applications of the rule \tt{la\_generic}.
+We use this encoding of integer operations for extending our existing embedding of Alethe proofs in Lambdapi \cite{ColtellacciMD24}. In particular, the SMT sort $\textbf{Int}$ is mapped to $\el~\texttt{int}$, and the arithmetic operations of SMT to their counterparts in the Lambdapi encoding. The following section describes how we leverage this representation of integers in Lambdapi to simulate the algorithm presented in Sect.~\ref{sssect:la-in-alethe} for checking applications of the rule \tt{la\_generic}.
 
 % \subsection{Functions used in the translation}
 

@@ -1,28 +1,27 @@
 \section{Elaborating lia\_generic steps}
 \label{sec:elaboration-lia}
 
-\todo[sm]{Reviewer 1 asks us to improve the presentation.}
+%\todo[sm]{Reviewer 1 asks us to improve the presentation.}
 The rule \tt{lia\_generic} is similar to \tt{la\_generic}, but the SMT solver does not provide the coefficients,
 i.e.\ \colorbox{orange!30}{$[a_1 \dots a_r]$} is empty.
 %Since this rule can introduce a disjunction of arbitrary linear integer inequalities without any additional hints, proof checking is \emph{NP-complete} \cite{Schrijver:lia}.
 We decided to leverage the elaboration process of \tt{lia\_generic} performed by Carcara, as doing otherwise would require implementing Fourier-Motzkin elimination for integers, as done in \cite{micromega,omegatest}, hence reimplementing work that was already done by the solver.
 
 Carcara considers $\tt{lia\_generic}$ steps as holes in the proof, given that ``their checking is as hard as solving'' \cite[\S 3.2]{carcara}.
-To address this, Carcara invokes an external SMT solver, such as cvc5, or any tool capable of reading SMT-LIB input and producing Alethe proofs, and attempts to generate Alethe proofs that avoid using $\tt{lia\_generic}$. 
+To address this, Carcara invokes an external SMT solver, such as cvc5, or any tool capable of reading SMT-LIB input and producing Alethe proofs, and attempts to generate an Alethe proof that avoid using $\tt{lia\_generic}$. 
 Suppose the resulting proof still includes a $\tt{lia\_generic}$ step. In that case, Carcara repeats the process for up to three iterations, merging the final results if a complete proof without any $\tt{lia\_generic}$ steps is eventually found.
 The proof is then imported and validated, replacing the original step.
 
 \begin{example}[Sketch of lia\_generic elaboration]
-
+%
 Consider a step $S$ (List.~\ref{lst:pb_lia}) concluding the clause $\neg l_1 \lor \dots \neg l_n$ where all $l_i$ are inequalities and proved by $\tt{lia\_generic}$ rule.
     
 \begin{lstlisting}[language=SMT,caption={Elaborated proof},label={lst:pb_lia}]
     (step S (cl (not l1) ... (not ln)) :rule lia_generic)
 \end{lstlisting}
 %
-Carcara will generate an SMT-LIB problem asserting $l_1$, \dots, $l_n$ and invoke the solver cvc5 on it, expecting an Alethe proof \changed{sm}{of the unsatisfiability of $l_1 \land \dots \land l_n$}
+Carcara will generate an SMT-LIB problem asserting $l_1$, \dots, $l_n$ and invoke the solver cvc5 on it, expecting an Alethe proof of the unsatisfiability of $l_1 \land \dots \land l_n$
 that does not use \tt{lia\_generic}. Carcara will check this subproof and then replace the original step by a proof of the form shown in List.~\ref{lst:elab_lia}.
-\todo[sm]{I don't understand the reference to \texttt{S.t\_m+1} since that step appears nowhere.}
 
 \begin{lstlisting}[language=SMT,caption={Elaboration of \tt{lia\_generic}},label={lst:elab_lia}]
 (anchor :step S.t_m+1)
